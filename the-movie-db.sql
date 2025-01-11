@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 11, 2025 at 01:23 PM
+-- Generation Time: Jan 11, 2025 at 04:25 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -28,12 +28,14 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `accounts` (
-  `acocunt_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
   `role_id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(128) NOT NULL,
   `is_active` tinyint(1) NOT NULL,
-  `is_verified` tinyint(1) NOT NULL
+  `is_verified` tinyint(1) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -48,7 +50,9 @@ CREATE TABLE `account_details` (
   `profile_picture` varchar(500) NOT NULL,
   `gender` tinyint(1) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL
+  `description` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -61,7 +65,9 @@ CREATE TABLE `certifications` (
   `certification_id` int(11) NOT NULL,
   `certification` varchar(10) NOT NULL,
   `mean` varchar(255) NOT NULL,
-  `country` varchar(10) NOT NULL
+  `country` varchar(10) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -75,8 +81,9 @@ CREATE TABLE `email_confirmations` (
   `account_id` int(11) NOT NULL,
   `email` varchar(320) NOT NULL,
   `confirmation_code` tinyint(6) NOT NULL,
-  `created_at` date NOT NULL,
-  `expires_at` date NOT NULL
+  `created_at` datetime NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -88,7 +95,7 @@ CREATE TABLE `email_confirmations` (
 CREATE TABLE `favorite_movies` (
   `account_id` int(11) NOT NULL,
   `movie_id` int(11) NOT NULL,
-  `added_date` date NOT NULL
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -100,7 +107,7 @@ CREATE TABLE `favorite_movies` (
 CREATE TABLE `favorite_tv_series` (
   `account_id` int(11) NOT NULL,
   `tv_series_id` int(11) NOT NULL,
-  `added_date` date NOT NULL
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -111,7 +118,9 @@ CREATE TABLE `favorite_tv_series` (
 
 CREATE TABLE `genres` (
   `genre_id` int(11) NOT NULL,
-  `name` int(11) NOT NULL
+  `name` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -122,7 +131,9 @@ CREATE TABLE `genres` (
 
 CREATE TABLE `keywords` (
   `keyword_id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL
+  `name` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -138,7 +149,9 @@ CREATE TABLE `lists` (
   `favorite_count` int(11) NOT NULL,
   `item_count` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `poster_path` varchar(500) NOT NULL
+  `poster_path` varchar(500) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -151,7 +164,8 @@ CREATE TABLE `media_lists` (
   `list_id` int(11) NOT NULL,
   `movie_id` int(11) NOT NULL,
   `tv_series_id` int(11) NOT NULL,
-  `type` varchar(10) NOT NULL
+  `type` varchar(10) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -177,7 +191,9 @@ CREATE TABLE `movies` (
   `status` varchar(20) NOT NULL,
   `title` varchar(100) NOT NULL,
   `vote_average` float NOT NULL,
-  `vote_count` int(11) NOT NULL
+  `vote_count` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -188,7 +204,9 @@ CREATE TABLE `movies` (
 
 CREATE TABLE `movie_certifications` (
   `movie_id` int(11) NOT NULL,
-  `certification_id` int(11) NOT NULL
+  `certification_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -199,7 +217,8 @@ CREATE TABLE `movie_certifications` (
 
 CREATE TABLE `movie_genres` (
   `movie_id` int(11) NOT NULL,
-  `genre_id` int(11) NOT NULL
+  `genre_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -217,7 +236,9 @@ CREATE TABLE `movie_images` (
   `height` smallint(6) NOT NULL,
   `width` smallint(6) NOT NULL,
   `file_path` varchar(500) NOT NULL,
-  `vote_average` float NOT NULL
+  `vote_average` float NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -228,7 +249,8 @@ CREATE TABLE `movie_images` (
 
 CREATE TABLE `movie_keywords` (
   `movie_id` int(11) NOT NULL,
-  `keyword_id` int(11) NOT NULL
+  `keyword_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -239,7 +261,8 @@ CREATE TABLE `movie_keywords` (
 
 CREATE TABLE `movie_people` (
   `movie_id` int(11) NOT NULL,
-  `person_id` int(11) NOT NULL
+  `person_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -250,7 +273,8 @@ CREATE TABLE `movie_people` (
 
 CREATE TABLE `movie_reviews` (
   `movie_id` int(11) NOT NULL,
-  `review_id` int(11) NOT NULL
+  `review_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -269,7 +293,9 @@ CREATE TABLE `movie_videos` (
   `type` text NOT NULL,
   `official` tinyint(1) NOT NULL,
   `popularity` float NOT NULL,
-  `published_at` date NOT NULL
+  `published_at` date NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -282,7 +308,9 @@ CREATE TABLE `networks` (
   `network_id` int(11) NOT NULL,
   `logo_path` varchar(500) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `original_country` varchar(10) NOT NULL
+  `original_country` varchar(10) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -294,7 +322,9 @@ CREATE TABLE `networks` (
 CREATE TABLE `nicknames` (
   `nickname_id` int(11) NOT NULL,
   `person_id` int(11) NOT NULL,
-  `nickname` int(11) NOT NULL
+  `nickname` int(11) NOT NULL,
+  `create_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -314,7 +344,9 @@ CREATE TABLE `people` (
   `known_for_department` varchar(100) NOT NULL,
   `name` varchar(100) NOT NULL,
   `place_of_birth` varchar(500) NOT NULL,
-  `profile_path` varchar(500) NOT NULL
+  `profile_path` varchar(500) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -333,7 +365,9 @@ CREATE TABLE `person_images` (
   `width` smallint(6) NOT NULL,
   `file_path` varchar(500) NOT NULL,
   `vote_average` float NOT NULL,
-  `vote_count` int(11) NOT NULL
+  `vote_count` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -346,7 +380,7 @@ CREATE TABLE `rating_movies` (
   `account_id` int(11) NOT NULL,
   `movie_id` int(11) NOT NULL,
   `rating` float NOT NULL,
-  `rated_date` date NOT NULL
+  `rated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -359,7 +393,7 @@ CREATE TABLE `rating_tv_series` (
   `account_id` int(11) NOT NULL,
   `tv_series_id` int(11) NOT NULL,
   `rating` int(11) NOT NULL,
-  `rated_date` date NOT NULL
+  `rated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -384,8 +418,27 @@ CREATE TABLE `reviews` (
 
 CREATE TABLE `roles` (
   `role_id` int(11) NOT NULL,
-  `role` varchar(50) NOT NULL
+  `role` varchar(50) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sequelizemeta`
+--
+
+CREATE TABLE `sequelizemeta` (
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `sequelizemeta`
+--
+
+INSERT INTO `sequelizemeta` (`name`) VALUES
+('20250111135550-create-account.js');
 
 -- --------------------------------------------------------
 
@@ -395,7 +448,9 @@ CREATE TABLE `roles` (
 
 CREATE TABLE `social_networks` (
   `social_network_id` int(11) NOT NULL,
-  `social_network` varchar(255) NOT NULL
+  `social_network` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -410,7 +465,9 @@ CREATE TABLE `social_network_details` (
   `person_id` int(11) NOT NULL,
   `movie_id` int(11) NOT NULL,
   `tv_series_id` int(11) NOT NULL,
-  `social_network_username` int(11) NOT NULL
+  `social_network_username` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -422,14 +479,16 @@ CREATE TABLE `social_network_details` (
 CREATE TABLE `tv_episodes` (
   `tv_episode_id` int(11) NOT NULL,
   `tv_season_id` int(11) NOT NULL,
-  `air_date` date NOT NULL,
+  `air_date` datetime NOT NULL,
   `episode_number` smallint(6) NOT NULL,
   `name` varchar(100) NOT NULL,
   `overview` varchar(500) NOT NULL,
   `runtime` smallint(6) NOT NULL,
   `still_path` varchar(500) NOT NULL,
   `vote_average` float NOT NULL,
-  `vote_count` int(11) NOT NULL
+  `vote_count` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -454,13 +513,15 @@ CREATE TABLE `tv_seasons` (
   `tv_season_id` int(11) NOT NULL,
   `tv_series_id` int(11) NOT NULL,
   `account_id` int(11) NOT NULL,
-  `air_date` date NOT NULL,
+  `air_date` datetime NOT NULL,
   `name` varchar(100) NOT NULL,
   `overview` varchar(500) NOT NULL,
   `poster_path` varchar(500) NOT NULL,
   `season_number` smallint(6) NOT NULL,
   `vote_average` float NOT NULL,
-  `vote_count` int(11) NOT NULL
+  `vote_count` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -473,10 +534,10 @@ CREATE TABLE `tv_series` (
   `tv_series_id` int(11) NOT NULL,
   `adult` tinyint(1) NOT NULL,
   `backdrop_path` varchar(500) NOT NULL,
-  `first_air_date` date NOT NULL,
+  `first_air_date` datetime NOT NULL,
   `homepage` varchar(100) NOT NULL,
   `in_production` tinyint(1) NOT NULL,
-  `last_air_date` date NOT NULL,
+  `last_air_date` datetime NOT NULL,
   `name` varchar(100) NOT NULL,
   `next_episode_to_air` int(11) NOT NULL,
   `original_country` varchar(10) NOT NULL,
@@ -487,7 +548,9 @@ CREATE TABLE `tv_series` (
   `status` varchar(20) NOT NULL,
   `popularity` int(11) NOT NULL,
   `vote_average` float NOT NULL,
-  `vote_count` int(11) NOT NULL
+  `vote_count` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -498,7 +561,8 @@ CREATE TABLE `tv_series` (
 
 CREATE TABLE `tv_series_certifications` (
   `tv_series_id` int(11) NOT NULL,
-  `certification_id` int(11) NOT NULL
+  `certification_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -509,7 +573,8 @@ CREATE TABLE `tv_series_certifications` (
 
 CREATE TABLE `tv_series_genres` (
   `tv_series_id` int(11) NOT NULL,
-  `genre_id` int(11) NOT NULL
+  `genre_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -530,7 +595,9 @@ CREATE TABLE `tv_series_images` (
   `width` smallint(6) NOT NULL,
   `file_path` varchar(500) NOT NULL,
   `vote_average` float NOT NULL,
-  `vote_count` int(11) NOT NULL
+  `vote_count` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -541,7 +608,8 @@ CREATE TABLE `tv_series_images` (
 
 CREATE TABLE `tv_series_networks` (
   `tv_series_id` int(11) NOT NULL,
-  `network_id` int(11) NOT NULL
+  `network_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -552,7 +620,8 @@ CREATE TABLE `tv_series_networks` (
 
 CREATE TABLE `tv_series_reviews` (
   `tv_series_id` int(11) NOT NULL,
-  `review_id` int(11) NOT NULL
+  `review_id` int(11) NOT NULL,
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -571,7 +640,9 @@ CREATE TABLE `tv_series_videos` (
   `size` smallint(6) NOT NULL,
   `type` varchar(100) NOT NULL,
   `official` tinyint(1) NOT NULL,
-  `published_at` date NOT NULL
+  `published_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -583,7 +654,7 @@ CREATE TABLE `tv_series_videos` (
 CREATE TABLE `watchlist_movies` (
   `account_id` int(11) NOT NULL,
   `movie_id` int(11) NOT NULL,
-  `added_date` date NOT NULL
+  `added_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -595,7 +666,7 @@ CREATE TABLE `watchlist_movies` (
 CREATE TABLE `watchlist_tv_series` (
   `account_id` int(11) NOT NULL,
   `movie_id` int(11) NOT NULL,
-  `rated_date` date NOT NULL
+  `rated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -606,7 +677,7 @@ CREATE TABLE `watchlist_tv_series` (
 -- Indexes for table `accounts`
 --
 ALTER TABLE `accounts`
-  ADD PRIMARY KEY (`acocunt_id`),
+  ADD PRIMARY KEY (`account_id`),
   ADD KEY `fk_accounts_role_id` (`role_id`);
 
 --
@@ -782,6 +853,13 @@ ALTER TABLE `roles`
   ADD PRIMARY KEY (`role_id`);
 
 --
+-- Indexes for table `sequelizemeta`
+--
+ALTER TABLE `sequelizemeta`
+  ADD PRIMARY KEY (`name`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
 -- Indexes for table `social_networks`
 --
 ALTER TABLE `social_networks`
@@ -890,7 +968,7 @@ ALTER TABLE `watchlist_tv_series`
 -- AUTO_INCREMENT for table `accounts`
 --
 ALTER TABLE `accounts`
-  MODIFY `acocunt_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `account_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `account_details`
@@ -1038,33 +1116,33 @@ ALTER TABLE `accounts`
 -- Constraints for table `account_details`
 --
 ALTER TABLE `account_details`
-  ADD CONSTRAINT `fk_account_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`);
+  ADD CONSTRAINT `fk_account_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`);
 
 --
 -- Constraints for table `email_confirmations`
 --
 ALTER TABLE `email_confirmations`
-  ADD CONSTRAINT `fk_email_confirmations_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`);
+  ADD CONSTRAINT `fk_email_confirmations_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`);
 
 --
 -- Constraints for table `favorite_movies`
 --
 ALTER TABLE `favorite_movies`
-  ADD CONSTRAINT `fk_favorite_movies_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_favorite_movies_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_favorite_movies_movie_id` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`);
 
 --
 -- Constraints for table `favorite_tv_series`
 --
 ALTER TABLE `favorite_tv_series`
-  ADD CONSTRAINT `fk_favorite_tv_series_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_favorite_tv_series_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_favorite_tv_series_tv_series_id` FOREIGN KEY (`tv_series_id`) REFERENCES `tv_series` (`tv_series_id`);
 
 --
 -- Constraints for table `lists`
 --
 ALTER TABLE `lists`
-  ADD CONSTRAINT `fk_lists_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`);
+  ADD CONSTRAINT `fk_lists_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`);
 
 --
 -- Constraints for table `media_lists`
@@ -1092,7 +1170,7 @@ ALTER TABLE `movie_genres`
 -- Constraints for table `movie_images`
 --
 ALTER TABLE `movie_images`
-  ADD CONSTRAINT `fk_movie_images_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_movie_images_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_movie_images_movie_id` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`);
 
 --
@@ -1120,7 +1198,7 @@ ALTER TABLE `movie_reviews`
 -- Constraints for table `movie_videos`
 --
 ALTER TABLE `movie_videos`
-  ADD CONSTRAINT `fk_movie_videos_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_movie_videos_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_movie_videos_movie_id` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`);
 
 --
@@ -1134,33 +1212,33 @@ ALTER TABLE `nicknames`
 --
 ALTER TABLE `person_images`
   ADD CONSTRAINT `fk_person_images_person_id` FOREIGN KEY (`person_id`) REFERENCES `people` (`person_id`),
-  ADD CONSTRAINT `person_images_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`);
+  ADD CONSTRAINT `person_images_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`);
 
 --
 -- Constraints for table `rating_movies`
 --
 ALTER TABLE `rating_movies`
-  ADD CONSTRAINT `fk_rating_movies_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_rating_movies_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_rating_movies_movie_id` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`);
 
 --
 -- Constraints for table `rating_tv_series`
 --
 ALTER TABLE `rating_tv_series`
-  ADD CONSTRAINT `fk_rating_tv_series_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_rating_tv_series_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_rating_tv_series_tv_series_id` FOREIGN KEY (`tv_series_id`) REFERENCES `tv_series` (`tv_series_id`);
 
 --
 -- Constraints for table `reviews`
 --
 ALTER TABLE `reviews`
-  ADD CONSTRAINT `fk_reviews_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`);
+  ADD CONSTRAINT `fk_reviews_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`);
 
 --
 -- Constraints for table `social_network_details`
 --
 ALTER TABLE `social_network_details`
-  ADD CONSTRAINT `fk_social_network_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_social_network_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_social_network_details_movie_id` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`),
   ADD CONSTRAINT `fk_social_network_details_person_id` FOREIGN KEY (`person_id`) REFERENCES `people` (`person_id`),
   ADD CONSTRAINT `fk_social_network_details_social_network_id` FOREIGN KEY (`social_network_id`) REFERENCES `social_networks` (`social_network_id`),
@@ -1203,7 +1281,7 @@ ALTER TABLE `tv_series_genres`
 -- Constraints for table `tv_series_images`
 --
 ALTER TABLE `tv_series_images`
-  ADD CONSTRAINT `fk_tv_series_images_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_tv_series_images_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_tv_series_images_tv_series_id` FOREIGN KEY (`tv_series_id`) REFERENCES `tv_series` (`tv_series_id`);
 
 --
@@ -1224,21 +1302,21 @@ ALTER TABLE `tv_series_reviews`
 -- Constraints for table `tv_series_videos`
 --
 ALTER TABLE `tv_series_videos`
-  ADD CONSTRAINT `fk_tv_series_videos_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_tv_series_videos_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_tv_series_videos_tv_series_id` FOREIGN KEY (`tv_series_id`) REFERENCES `tv_series` (`tv_series_id`);
 
 --
 -- Constraints for table `watchlist_movies`
 --
 ALTER TABLE `watchlist_movies`
-  ADD CONSTRAINT `fk_watchlist_movies_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_watchlist_movies_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_watchlist_movies_movie_id` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`);
 
 --
 -- Constraints for table `watchlist_tv_series`
 --
 ALTER TABLE `watchlist_tv_series`
-  ADD CONSTRAINT `fk_watchlist_tv_series_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`acocunt_id`),
+  ADD CONSTRAINT `fk_watchlist_tv_series_account_id` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
   ADD CONSTRAINT `fk_watchlist_tv_series_movie_id` FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`);
 COMMIT;
 
