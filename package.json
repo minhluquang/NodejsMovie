@@ -1,0 +1,25 @@
+{
+  "name": "nodejsmovie",
+  "version": "1.0.0",
+  "description": "A Node.js project to interact with The Movie Database API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./src/server.js"
+  },
+  "author": "Minh Q. Lu",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "mysql2": "^2.2.5",
+    "save": "^2.9.0"
+  },
+  "devDependencies": {
+    "sequelize": "^6.37.5",
+    "sequelize-cli": "^6.2.0"
+  }
+}
