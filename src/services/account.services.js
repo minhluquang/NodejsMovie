@@ -1,8 +1,13 @@
+require("dotenv").config();
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const {
   Account,
   AccountDetail,
   SocialNetworkDetail,
   EmailConfirmation,
+  Role,
   sequelize,
 } = require("../models");
 
@@ -85,7 +90,7 @@ const createNewAccountServices = async (username, password, email) => {
       return {
         success: false,
         code: 400,
-        data: { msg: "Username already exists" },
+        data: { type_error: "username_exists", msg: "Username already exists" },
       };
     }
 
@@ -100,12 +105,11 @@ const createNewAccountServices = async (username, password, email) => {
       return {
         success: false,
         code: 400,
-        data: { msg: "Email already exists" },
+        data: { type_error: "email_exists", msg: "Email already exists" },
       };
     }
 
     // Hash the password before create a record
-    const bcrypt = require("bcrypt");
     const salt = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(password, salt);
 
@@ -410,9 +414,7 @@ const verifyEmailAddressServices = async (email, code) => {
       const updateAccount = await Account.update(
         {
           is_verified: 1,
-          updated_at: sequelize.literal(
-            "NOW()"
-          ),
+          updated_at: sequelize.literal("NOW()"),
         },
         { where: { email }, returning: true, transaction }
       );
@@ -459,6 +461,61 @@ const verifyEmailAddressServices = async (email, code) => {
   }
 };
 
+// login
+const loginServices = async (username, password) => {
+  try {
+    const account = await Account.findOne({
+      where: { username },
+      include: [
+        {
+          model: Role,
+          attributes: ["role"],
+        },
+      ],
+    });
+
+    // Return if have no account
+    if (!account || account.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No account found" },
+      };
+    }
+
+    const isPasswordValid = bcrypt.compareSync(password, account.password);
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        code: 401,
+        data: { msg: "Invalid credentials" },
+      };
+    }
+
+    // Gen the access token
+    const payload = {
+      username: account.username,
+      role: account.Role.role,
+    };
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRE,
+    });
+
+    // Return if true username & password
+    return {
+      success: true,
+      code: 200,
+      data: {
+        msg: "Login successful",
+        accessToken,
+        username: account.username,
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getAllAccountsServices,
   getAccountServices,
@@ -466,4 +523,5 @@ module.exports = {
   updateAccountServices,
   deleteAccountServices,
   verifyEmailAddressServices,
+  loginServices,
 };

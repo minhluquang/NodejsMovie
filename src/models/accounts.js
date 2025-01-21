@@ -24,11 +24,11 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
-      // Account.hasOne(models.Role, {
-      //   foreignKey: "role_id",
-      //   onDelete: "CASCADE",
-      //   onUpdate: "CASCADE",
-      // })
+      Account.belongsTo(models.Role, {
+        foreignKey: "role_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   Account.init(

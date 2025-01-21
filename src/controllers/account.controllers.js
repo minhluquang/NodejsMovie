@@ -6,6 +6,7 @@ const {
   updateAccountServices,
   deleteAccountServices,
   verifyEmailAddressServices,
+  loginServices,
 } = require("../services/account.services");
 
 // Get all accounts
@@ -185,6 +186,38 @@ const verifyEmailAddress = [
   },
 ];
 
+// Get all accounts
+const login = [
+  body("username")
+    .isLength({ min: 4, max: 50 })
+    .withMessage("Username must be at least 4 characters long"),
+  body("password")
+    .isLength({ min: 4 })
+    .withMessage("Password must be at least 4 characters long"),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        data: errors.array(),
+      });
+    }
+
+    try {
+      const { username, password } = req.body;
+      const loginResult = await loginServices(username, password);
+      res.status(loginResult.code).send(loginResult);
+    } catch (error) {
+      res
+        .status(500)
+        .send({ success: false, code: 500, data: { msg: error.message } });
+    }
+  },
+];
+
 module.exports = {
   getAllAccounts,
   getAccount,
@@ -192,4 +225,5 @@ module.exports = {
   updateAccount,
   deleteAccount,
   verifyEmailAddress,
+  login,
 };
