@@ -26,20 +26,18 @@ module.exports = (sequelize, DataTypes) => {
       account_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Account",
+          key: "account_id",
+        },
       },
       email: {
         type: DataTypes.STRING(254),
         allowNull: false,
-        unique: true,
-        validate: {
-          isEmail: true,
-        },
       },
-      confirmation_code: {
-        type: DataTypes.STRING(6),
-        allowNull: false,
+      token: {
+        type: DataTypes.STRING(500),
       },
-      expires_at: { type: DataTypes.DATE, allowNull: false },
       created_at: { type: DataTypes.DATE, allowNull: false },
       updated_at: { type: DataTypes.DATE, allowNull: false },
     },

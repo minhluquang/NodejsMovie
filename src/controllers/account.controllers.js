@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { body, param, validationResult } = require("express-validator");
 const {
   getAllAccountsServices,
@@ -5,9 +6,13 @@ const {
   createNewAccountServices,
   updateAccountServices,
   deleteAccountServices,
-  verifyEmailAddressServices,
+  verifyOTPEmailAddressServices,
   loginServices,
+  sendVerifyEmailAddressServices,
+  resetPasswordServices,
 } = require("../services/account.services");
+
+const { verifyEmailAddressServices } = require("../services/mailer.services");
 
 // Get all accounts
 const getAllAccounts = async (req, res) => {
@@ -15,9 +20,7 @@ const getAllAccounts = async (req, res) => {
     const getAllAccountsResult = await getAllAccountsServices();
     res.status(getAllAccountsResult.code).send(getAllAccountsResult);
   } catch (error) {
-    res
-      .status(500)
-      .send({ success: false, code: 500, data: { msg: error.message } });
+    res.status(500).send({ success: false, data: { msg: error.message } });
   }
 };
 
@@ -34,7 +37,7 @@ const getAccount = [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        code: 400,
+
         data: errors.array(),
       });
     }
@@ -44,9 +47,7 @@ const getAccount = [
       const getAccountResult = await getAccountServices(field, value);
       res.status(getAccountResult.code).send(getAccountResult);
     } catch (error) {
-      res
-        .status(500)
-        .send({ success: false, code: 500, data: { msg: error.message } });
+      res.status(500).send({ success: false, data: { msg: error.message } });
     }
   },
 ];
@@ -67,24 +68,26 @@ const createNewAccount = [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        code: 400,
+
         data: errors.array(),
       });
     }
 
     try {
       const { username, password, email } = req.body;
-
       const createNewAccountResult = await createNewAccountServices(
         username,
         password,
         email
       );
+
+      if (createNewAccountResult.success) {
+        await sendVerifyEmailAddressServices(email);
+      }
+
       res.status(createNewAccountResult.code).send(createNewAccountResult);
     } catch (error) {
-      res
-        .status(500)
-        .send({ success: false, code: 500, data: { msg: error.message } });
+      res.status(500).send({ success: false, data: { msg: error.message } });
     }
   },
 ];
@@ -105,7 +108,7 @@ const updateAccount = [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        code: 400,
+
         data: errors.array(),
       });
     }
@@ -133,9 +136,7 @@ const updateAccount = [
       );
       res.status(updateAccountResult.code).send(updateAccountResult);
     } catch (error) {
-      res
-        .status(500)
-        .send({ success: false, code: 500, data: { msg: error.message } });
+      res.status(500).send({ success: false, data: { msg: error.message } });
     }
   },
 ];
@@ -147,14 +148,12 @@ const deleteAccount = async (req, res) => {
     const deleteAccountResult = await deleteAccountServices(account_id);
     res.status(deleteAccountResult.code).send(deleteAccountResult);
   } catch (error) {
-    res
-      .status(500)
-      .send({ success: false, code: 500, data: { msg: error.message } });
+    res.status(500).send({ success: false, data: { msg: error.message } });
   }
 };
 
 // verify the email address
-const verifyEmailAddress = [
+const verifyOTPEmailAddress = [
   body("email").isEmail().withMessage("Please enter a valid email address"),
   body("code")
     .isNumeric()
@@ -167,21 +166,21 @@ const verifyEmailAddress = [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        code: 400,
+
         data: errors.array(),
       });
     }
     try {
       const { email, code } = req.body;
-      const verifyEmailAddressResult = await verifyEmailAddressServices(
+      const verifyOTPEmailAddressResult = await verifyOTPEmailAddressServices(
         email,
         code
       );
-      res.status(verifyEmailAddressResult.code).send(verifyEmailAddressResult);
-    } catch (error) {
       res
-        .status(500)
-        .send({ success: false, code: 500, data: { msg: error.message } });
+        .status(verifyOTPEmailAddressResult.code)
+        .send(verifyOTPEmailAddressResult);
+    } catch (error) {
+      res.status(500).send({ success: false, data: { msg: error.message } });
     }
   },
 ];
@@ -201,7 +200,6 @@ const login = [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        code: 400,
         data: errors.array(),
       });
     }
@@ -211,9 +209,63 @@ const login = [
       const loginResult = await loginServices(username, password);
       res.status(loginResult.code).send(loginResult);
     } catch (error) {
-      res
-        .status(500)
-        .send({ success: false, code: 500, data: { msg: error.message } });
+      res.status(500).send({ success: false, data: { msg: error.message } });
+    }
+  },
+];
+
+// Verify email address
+const verifyEmailAddress = async (req, res) => {
+  try {
+    const { token } = req.query;
+    const verifyEmailAddressResult = await verifyEmailAddressServices(token);
+
+    if (verifyEmailAddressResult.success) {
+      res.redirect(`${process.env.FRONTEND_URL}/`);
+    }
+
+    res.redirect(`${process.env.FRONTEND_URL}/verify-email`);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+const resetPassword = [
+  body("username")
+    .isLength({ min: 4, max: 50 })
+    .withMessage("Username must be at least 4 characters long"),
+  body("newPassword")
+    .isLength({ min: 4 })
+    .withMessage("New password must be at least 4 characters long"),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+
+        data: errors.array(),
+      });
+    }
+
+    try {
+      const { username, newPassword, confirmPassword } = req.body;
+
+      if (newPassword !== confirmPassword) {
+        return res
+          .status(400)
+          .send({ success: false, data: { msg: "Passwords do not match" } });
+      }
+
+      const resetPasswordResult = await resetPasswordServices(
+        username,
+        newPassword
+      );
+
+      res.status(resetPasswordResult.code).send(resetPasswordResult);
+    } catch (error) {
+      res.status(500).send({ success: false, data: { msg: error.message } });
     }
   },
 ];
@@ -224,6 +276,8 @@ module.exports = {
   createNewAccount,
   updateAccount,
   deleteAccount,
-  verifyEmailAddress,
+  verifyOTPEmailAddress,
   login,
+  verifyEmailAddress,
+  resetPassword,
 };

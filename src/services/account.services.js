@@ -2,6 +2,8 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const { sendMailServices } = require("./mailer.services");
+
 const {
   Account,
   AccountDetail,
@@ -22,9 +24,6 @@ const {
   getAccountDetailByAccountIDServices,
   updateAccountDetailServices,
 } = require("./accountDetail.services");
-
-const moment = require("moment-timezone");
-const { ExpressValidator } = require("express-validator");
 
 // Get all account
 const getAllAccountsServices = async () => {
@@ -78,7 +77,6 @@ const createNewAccountServices = async (username, password, email) => {
   let transaction;
   try {
     transaction = await sequelize.transaction();
-
     // Check if exist username before
     const isExistUsername = await Account.findOne({
       where: { username },
@@ -110,7 +108,9 @@ const createNewAccountServices = async (username, password, email) => {
     }
 
     // Hash the password before create a record
-    const salt = bcrypt.genSaltSync(10);
+    const salt = await bcrypt.genSaltSync(
+      Number(process.env.BCRYPT_SALT_ROUND)
+    );
     const hashPassword = bcrypt.hashSync(password, salt);
 
     // Create a new account
@@ -123,6 +123,7 @@ const createNewAccountServices = async (username, password, email) => {
       is_verified: 0,
       created_at: sequelize.literal("NOW()"),
       updated_at: sequelize.literal("NOW()"),
+      email_verify_at: null,
     });
     await newAccount.save({ transaction });
 
@@ -148,9 +149,8 @@ const createNewAccountServices = async (username, password, email) => {
     // Create email confirmation
     const newEmailConfirmation = new EmailConfirmation({
       account_id: newAccount.account_id,
-      email: email,
-      confirmation_code: Math.floor(100000 + Math.random() * 900000).toString(),
-      expires_at: sequelize.literal("DATE_ADD(NOW(), INTERVAL 15 MINUTE)"),
+      email,
+      is_used: 0,
       created_at: sequelize.literal("NOW()"),
       updated_at: sequelize.literal("NOW()"),
     });
@@ -172,6 +172,7 @@ const createNewAccountServices = async (username, password, email) => {
           is_verified: newAccount.is_verified,
           created_at: new Date(),
           updated_at: new Date(),
+          email_verify_at: null,
         },
       },
     };
@@ -288,7 +289,10 @@ const updateAccountServices = async (
 
 // Delete an account (active = 0)
 const deleteAccountServices = async (account_id) => {
+  let transaction;
   try {
+    transaction = await sequelize.transaction();
+
     const account = await Account.findOne({
       where: { account_id },
       attributes: { exclude: ["password"] },
@@ -308,7 +312,7 @@ const deleteAccountServices = async (account_id) => {
         is_active: 0,
         updated_at: sequelize.literal("NOW()"),
       },
-      { where: { account_id } }
+      { where: { account_id }, transaction }
     );
 
     if (updateAccount[0] === 0) {
@@ -338,12 +342,13 @@ const deleteAccountServices = async (account_id) => {
       },
     };
   } catch (error) {
+    transaction.rollback();
     throw error;
   }
 };
 
-// Verify email address
-const verifyEmailAddressServices = async (email, code) => {
+// Verify OTP email address
+const verifyOTPEmailAddressServices = async (email, code) => {
   let transaction;
   try {
     transaction = await sequelize.transaction();
@@ -516,12 +521,80 @@ const loginServices = async (username, password) => {
   }
 };
 
+// verify email address
+const sendVerifyEmailAddressServices = async (email) => {
+  try {
+    const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    const verificationUrl = `${process.env.APP_URL}/api/v1/accounts/verify-email-address?&token=${token}`;
+
+    // Send email
+    await sendMailServices(
+      email,
+      "Email verification required",
+      `
+        <h2>Email Verification</h2>
+        <p>Please click the link below to verify your email address:</p>
+        <a href="${verificationUrl}">Verify Email</a>
+      `
+    );
+    console.log("Verification email sent to", email);
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    throw new Error("Failed to send verification email");
+  }
+};
+
+const resetPasswordServices = async (username, newPassword) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    const account = await Account.findOne({
+      where: { username },
+    });
+
+    // Return if have no account
+    if (!account || account.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No account found" },
+      };
+    }
+
+    const salt = await bcrypt.genSalt(Number(process.env.BCRYPT_SALT_ROUND));
+    const hashNewPassword = bcrypt.hashSync(newPassword, salt);
+
+    account.password = hashNewPassword;
+    account.updated_at = sequelize.literal("NOW()");
+    account.save({ transaction });
+
+    await transaction.commit();
+
+    // Return if true username & password
+    return {
+      success: true,
+      code: 200,
+      data: {
+        msg: "Reset password successful",
+      },
+    };
+  } catch (error) {
+    transaction.rollback();
+    throw error;
+  }
+};
+
 module.exports = {
   getAllAccountsServices,
   getAccountServices,
   createNewAccountServices,
   updateAccountServices,
   deleteAccountServices,
-  verifyEmailAddressServices,
+  verifyOTPEmailAddressServices,
   loginServices,
+  sendVerifyEmailAddressServices,
+  resetPasswordServices,
 };

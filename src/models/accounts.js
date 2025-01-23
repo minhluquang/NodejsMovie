@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       is_verified: { type: DataTypes.TINYINT(1), allowNull: false },
       created_at: { type: DataTypes.DATE, allowNull: false },
       updated_at: { type: DataTypes.DATE, allowNull: false },
+      email_verify_at: { type: DataTypes.DATE },
     },
     {
       sequelize,
