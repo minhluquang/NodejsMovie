@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Account.hasOne(models.AccountDetail, {
         foreignKey: "account_id",
+        as: "account_detail",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });

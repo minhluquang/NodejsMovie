@@ -1,5 +1,6 @@
 require("dotenv").config();
-const { body, param, validationResult } = require("express-validator");
+const axios = require("axios");
+const { body, query, validationResult } = require("express-validator");
 const {
   getAllAccountsServices,
   getAccountServices,
@@ -10,6 +11,7 @@ const {
   loginServices,
   sendVerifyEmailAddressServices,
   resetPasswordServices,
+  verifyChangePasswordServices,
 } = require("../services/account.services");
 
 const { verifyEmailAddressServices } = require("../services/mailer.services");
@@ -26,10 +28,9 @@ const getAllAccounts = async (req, res) => {
 
 // Get one accounts
 const getAccount = [
-  param("field")
-    .isIn(["username", "email"])
-    .withMessage("Field must be either 'username' or 'email'"),
-  param("value").notEmpty().withMessage("Value must be provided for the field"),
+  query("username")
+    .isLength({ min: 4, max: 50 })
+    .withMessage("Username must be at least 4 characters long"),
 
   async (req, res) => {
     const errors = validationResult(req);
@@ -43,8 +44,8 @@ const getAccount = [
     }
 
     try {
-      const { field, value } = req.params;
-      const getAccountResult = await getAccountServices(field, value);
+      const { username } = req.query;
+      const getAccountResult = await getAccountServices(username);
       res.status(getAccountResult.code).send(getAccountResult);
     } catch (error) {
       res.status(500).send({ success: false, data: { msg: error.message } });
@@ -56,7 +57,7 @@ const getAccount = [
 const createNewAccount = [
   body("username")
     .isLength({ min: 4, max: 50 })
-    .withMessage("Username must be at least 3 characters long"),
+    .withMessage("Username must be at least 4 characters long"),
   body("password")
     .isLength({ min: 4 })
     .withMessage("Password must be at least 4 characters long"),
@@ -270,6 +271,26 @@ const resetPassword = [
   },
 ];
 
+// sendEmailChangePassword
+const verifyChangePassword = async (req, res) => {
+  try {
+    const { username, email, userIP, userLocation, userClient } = req.body;
+    const verifyChangePasswordResult = await verifyChangePasswordServices(
+      username,
+      email,
+      userIP,
+      userLocation,
+      userClient
+    );
+
+    res
+      .status(verifyChangePasswordResult.code)
+      .send(verifyChangePasswordResult);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getAllAccounts,
   getAccount,
@@ -280,4 +301,5 @@ module.exports = {
   login,
   verifyEmailAddress,
   resetPassword,
+  verifyChangePassword,
 };

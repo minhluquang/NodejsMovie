@@ -1,4 +1,6 @@
 require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -49,11 +51,12 @@ const getAllAccountsServices = async () => {
 };
 
 // Get one account
-const getAccountServices = async (field, value) => {
+const getAccountServices = async (username) => {
   try {
     const account = await Account.findOne({
-      where: { [field]: value },
+      where: { username },
       attributes: { exclude: ["password"] },
+      include: { model: AccountDetail, as: "account_detail" },
     });
 
     // Return if have no account
@@ -66,7 +69,28 @@ const getAccountServices = async (field, value) => {
     }
 
     // Return if have account
-    return { success: true, code: 200, data: account };
+    return {
+      success: true,
+      code: 200,
+      data: {
+        account_id: account.account_id,
+        role_id: account.role_id,
+        username: account.username,
+        email: account.email,
+        is_active: account.is_active,
+        is_verified: account.is_verified,
+        created_at: account.created_at,
+        updated_at: account.updated_at,
+        account_detail: {
+          profile_picture: account.account_detail.profile_picture,
+          gender: account.account_detail.gender,
+          name: account.account_detail.name,
+          description: account.account_detail.description,
+          created_at: account.account_detail.created_at,
+          updated_at: account.account_detail.updated_at,
+        },
+      },
+    };
   } catch (error) {
     throw error;
   }
@@ -527,7 +551,7 @@ const sendVerifyEmailAddressServices = async (email) => {
     const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    const verificationUrl = `${process.env.APP_URL}/api/v1/accounts/verify-email-address?&token=${token}`;
+    const verificationUrl = `${process.env.BACKEND_URL}/api/v1/accounts/verify-email-address?&token=${token}`;
 
     // Send email
     await sendMailServices(
@@ -540,6 +564,44 @@ const sendVerifyEmailAddressServices = async (email) => {
       `
     );
     console.log("Verification email sent to", email);
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    throw new Error("Failed to send verification email");
+  }
+};
+
+// send email to change password
+const verifyChangePasswordServices = async (
+  username,
+  email,
+  userIP,
+  userLocation,
+  userClient
+) => {
+  try {
+    const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    const verificationUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    // Read content of resetPassword.html
+    const resetPasswordTemplate = fs.readFileSync(
+      path.join(__dirname, "..", "templates", "resetPassword.html"),
+      "utf-8"
+    );
+
+    // Change variable in html file
+    const emailContent = resetPasswordTemplate
+      .replace(/{{username}}/g, username)
+      .replace(/{{userIP}}/g, userIP)
+      .replace(/{{userLocation}}/g, userLocation)
+      .replace(/{{userClient}}/g, userClient)
+      .replace(/{{userEmail}}/g, email)
+      .replace(/{{resetPasswordLink}}/g, verificationUrl);
+
+    // Send email
+    await sendMailServices(email, "Reset password request", emailContent);
+    console.log("Verification change password sent to", email);
   } catch (error) {
     console.error("Error sending verification email:", error);
     throw new Error("Failed to send verification email");
@@ -597,4 +659,5 @@ module.exports = {
   loginServices,
   sendVerifyEmailAddressServices,
   resetPasswordServices,
+  verifyChangePasswordServices,
 };
