@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       EmailConfirmation.belongsTo(models.Account, {
         foreignKey: "account_id",
+        as: "email_confirmation",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
@@ -36,6 +37,9 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       token: {
+        type: DataTypes.STRING(500),
+      },
+      token_change_password: {
         type: DataTypes.STRING(500),
       },
       created_at: { type: DataTypes.DATE, allowNull: false },

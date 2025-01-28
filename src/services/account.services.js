@@ -572,16 +572,30 @@ const sendVerifyEmailAddressServices = async (email) => {
 
 // send email to change password
 const verifyChangePasswordServices = async (
-  username,
   email,
   userIP,
   userLocation,
   userClient
 ) => {
   try {
-    const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const account = await Account.findOne({ where: { email } });
+
+    // Return if have no account
+    if (!account || account.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No account found" },
+      };
+    }
+
+    const token = jwt.sign(
+      { username: account.username, email: email },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
     const verificationUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
     // Read content of resetPassword.html
@@ -592,7 +606,7 @@ const verifyChangePasswordServices = async (
 
     // Change variable in html file
     const emailContent = resetPasswordTemplate
-      .replace(/{{username}}/g, username)
+      .replace(/{{username}}/g, account.username)
       .replace(/{{userIP}}/g, userIP)
       .replace(/{{userLocation}}/g, userLocation)
       .replace(/{{userClient}}/g, userClient)
@@ -602,19 +616,27 @@ const verifyChangePasswordServices = async (
     // Send email
     await sendMailServices(email, "Reset password request", emailContent);
     console.log("Verification change password sent to", email);
+    return {
+      success: true,
+      code: 200,
+      data: {
+        msg: "Send email to verify change password successful",
+      },
+    };
   } catch (error) {
     console.error("Error sending verification email:", error);
     throw new Error("Failed to send verification email");
   }
 };
 
-const resetPasswordServices = async (username, newPassword) => {
+const resetPasswordServices = async (username, newPassword, token) => {
   let transaction;
   try {
     transaction = await sequelize.transaction();
 
     const account = await Account.findOne({
       where: { username },
+      include: { model: EmailConfirmation, as: "email_confirmation" },
     });
 
     // Return if have no account
@@ -626,12 +648,26 @@ const resetPasswordServices = async (username, newPassword) => {
       };
     }
 
+    if (account.email_confirmation.token_change_password === token) {
+      return {
+        success: false,
+        code: 400,
+        data: { msg: "The token has already been used." },
+      };
+    }
+
+    // Update new password
     const salt = await bcrypt.genSalt(Number(process.env.BCRYPT_SALT_ROUND));
     const hashNewPassword = bcrypt.hashSync(newPassword, salt);
 
     account.password = hashNewPassword;
     account.updated_at = sequelize.literal("NOW()");
-    account.save({ transaction });
+    await account.save({ transaction });
+
+    // Store the token into email_confirmation table
+    account.email_confirmation.token_change_password = token;
+    account.email_confirmation.updated_at = sequelize.literal("NOW()");
+    await account.email_confirmation.save({ transaction });
 
     await transaction.commit();
 
@@ -649,6 +685,42 @@ const resetPasswordServices = async (username, newPassword) => {
   }
 };
 
+const checkValidTokenChangePasswordServices = async (token) => {
+  try {
+    const account = await Account.findOne({
+      include: {
+        model: EmailConfirmation,
+        as: "email_confirmation",
+        where: { token_change_password: token },
+      },
+    });
+
+    // Return if have no account
+    if (!account) {
+      return {
+        success: true,
+        code: 200,
+        data: {
+          msg: "Token is valid",
+        },
+      };
+    }
+
+    // Return if have account
+    return {
+      success: false,
+      code: 400,
+      data: {
+        msg: "Token has already been used",
+        username: account.username,
+        email: account.email,
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getAllAccountsServices,
   getAccountServices,
@@ -660,4 +732,5 @@ module.exports = {
   sendVerifyEmailAddressServices,
   resetPasswordServices,
   verifyChangePasswordServices,
+  checkValidTokenChangePasswordServices,
 };

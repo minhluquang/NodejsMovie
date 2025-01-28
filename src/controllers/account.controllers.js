@@ -12,9 +12,8 @@ const {
   sendVerifyEmailAddressServices,
   resetPasswordServices,
   verifyChangePasswordServices,
+  checkValidTokenChangePasswordServices,
 } = require("../services/account.services");
-
-const { verifyEmailAddressServices } = require("../services/mailer.services");
 
 // Get all accounts
 const getAllAccounts = async (req, res) => {
@@ -251,17 +250,16 @@ const resetPassword = [
     }
 
     try {
-      const { username, newPassword, confirmPassword } = req.body;
-
-      if (newPassword !== confirmPassword) {
+      const { username, newPassword, confirmNewPassword, token } = req.body;
+      if (newPassword.trim() !== confirmNewPassword.trim()) {
         return res
           .status(400)
           .send({ success: false, data: { msg: "Passwords do not match" } });
       }
-
       const resetPasswordResult = await resetPasswordServices(
         username,
-        newPassword
+        newPassword,
+        token
       );
 
       res.status(resetPasswordResult.code).send(resetPasswordResult);
@@ -274,9 +272,8 @@ const resetPassword = [
 // sendEmailChangePassword
 const verifyChangePassword = async (req, res) => {
   try {
-    const { username, email, userIP, userLocation, userClient } = req.body;
+    const { email, userIP, userLocation, userClient } = req.body;
     const verifyChangePasswordResult = await verifyChangePasswordServices(
-      username,
       email,
       userIP,
       userLocation,
@@ -286,6 +283,19 @@ const verifyChangePassword = async (req, res) => {
     res
       .status(verifyChangePasswordResult.code)
       .send(verifyChangePasswordResult);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+const checkValidTokenChangePassword = async (req, res) => {
+  try {
+    const { token } = req.query;
+    const checkValidTokenChangePasswordResult =
+      await checkValidTokenChangePasswordServices(token);
+    res
+      .status(checkValidTokenChangePasswordResult.code)
+      .send(checkValidTokenChangePasswordResult);
   } catch (error) {
     res.status(500).send({ success: false, data: { msg: error.message } });
   }
@@ -302,4 +312,5 @@ module.exports = {
   verifyEmailAddress,
   resetPassword,
   verifyChangePassword,
+  checkValidTokenChangePassword,
 };

@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       Account.hasOne(models.EmailConfirmation, {
         foreignKey: "account_id",
+        as: "email_confirmation",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
