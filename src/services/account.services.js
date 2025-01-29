@@ -545,28 +545,129 @@ const loginServices = async (username, password) => {
   }
 };
 
-// verify email address
+// send email to verify
 const sendVerifyEmailAddressServices = async (email) => {
   try {
+    const account = await Account.findOne({ where: { email } });
+
+    // Return if have no account
+    if (!account || account.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No account found" },
+      };
+    }
+
     const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    const verificationUrl = `${process.env.BACKEND_URL}/api/v1/accounts/verify-email-address?&token=${token}`;
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+
+    // Read content of emailVerification.html
+    const emailVerificationTemplate = fs.readFileSync(
+      path.join(__dirname, "..", "templates", "emailVerification.html"),
+      "utf-8"
+    );
+
+    // Change variable in html file
+    const emailContent = emailVerificationTemplate
+      .replace(/{{username}}/g, account.username)
+      .replace(/{{userEmail}}/g, email)
+      .replace(/{{emailVerifacationLink}}/g, verificationUrl);
 
     // Send email
-    await sendMailServices(
-      email,
-      "Email verification required",
-      `
-        <h2>Email Verification</h2>
-        <p>Please click the link below to verify your email address:</p>
-        <a href="${verificationUrl}">Verify Email</a>
-      `
-    );
+    await sendMailServices(email, "Email verification required", emailContent);
     console.log("Verification email sent to", email);
+
+    return {
+      success: true,
+      code: 200,
+      data: {
+        msg: "Send email to verify email successful",
+      },
+    };
   } catch (error) {
     console.error("Error sending verification email:", error);
     throw new Error("Failed to send verification email");
+  }
+};
+
+// verify emial address
+const verifyEmailAddressServices = async (token) => {
+  let transaction;
+
+  try {
+    transaction = await sequelize.transaction();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const account = await Account.findOne({
+      where: { email: decoded.email },
+      include: [{ model: EmailConfirmation }],
+    });
+
+    // Return if have no account => token fake
+    if (
+      !account ||
+      account.length === 0 ||
+      decoded.email !== account.EmailConfirmation.email
+    ) {
+      return { success: false, code: 404, data: { msg: "Invalid token" } };
+    }
+
+    if (account.EmailConfirmation.token === token) {
+      return {
+        success: false,
+        code: 400,
+        data: { msg: "This token has already been used." },
+      };
+    }
+
+    const updateAccount = await Account.update(
+      {
+        is_verified: 1,
+        updated_at: sequelize.literal("NOW()"),
+        email_verify_at: sequelize.literal("NOW()"),
+      },
+      { where: { email: account.email }, returning: true, transaction }
+    );
+
+    if (updateAccount[0] === 0) {
+      await transaction.rollback();
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No matching email found to update." },
+      };
+    }
+
+    const updateEmailConfirmation = await account.EmailConfirmation.update(
+      {
+        token_verify_email: token,
+        updated_at: sequelize.literal("NOW()"),
+      },
+      { where: { email: account.email }, returning: true, transaction }
+    );
+
+    if (updateEmailConfirmation[0] === 0) {
+      await transaction.rollback();
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No matching email found to update." },
+      };
+    }
+
+    await transaction.commit();
+
+    return {
+      success: true,
+      code: 200,
+      data: { msg: "Email successfully verified" },
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
   }
 };
 
@@ -730,6 +831,7 @@ module.exports = {
   verifyOTPEmailAddressServices,
   loginServices,
   sendVerifyEmailAddressServices,
+  verifyEmailAddressServices,
   resetPasswordServices,
   verifyChangePasswordServices,
   checkValidTokenChangePasswordServices,

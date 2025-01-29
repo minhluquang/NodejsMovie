@@ -10,6 +10,7 @@ const {
   verifyOTPEmailAddressServices,
   loginServices,
   sendVerifyEmailAddressServices,
+  verifyEmailAddressServices,
   resetPasswordServices,
   verifyChangePasswordServices,
   checkValidTokenChangePasswordServices,
@@ -288,6 +289,7 @@ const verifyChangePassword = async (req, res) => {
   }
 };
 
+// check token if it valid => accept change password
 const checkValidTokenChangePassword = async (req, res) => {
   try {
     const { token } = req.query;
@@ -301,6 +303,36 @@ const checkValidTokenChangePassword = async (req, res) => {
   }
 };
 
+// resend activation email
+const resendActivationEmail = [
+  body("email").isEmail().withMessage("Please enter a valid email address"),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+
+        data: errors.array(),
+      });
+    }
+
+    try {
+      const { email } = req.body;
+      const resendActivationEmailResult = await sendVerifyEmailAddressServices(
+        email
+      );
+
+      res
+        .status(resendActivationEmailResult.code)
+        .send(resendActivationEmailResult);
+    } catch (error) {
+      res.status(500).send({ success: false, data: { msg: error.message } });
+    }
+  },
+];
+
 module.exports = {
   getAllAccounts,
   getAccount,
@@ -313,4 +345,5 @@ module.exports = {
   resetPassword,
   verifyChangePassword,
   checkValidTokenChangePassword,
+  resendActivationEmail,
 };

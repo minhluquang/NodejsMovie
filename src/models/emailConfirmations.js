@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(254),
         allowNull: false,
       },
-      token: {
+      token_verify_email: {
         type: DataTypes.STRING(500),
       },
       token_change_password: {
