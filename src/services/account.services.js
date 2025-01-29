@@ -593,7 +593,7 @@ const sendVerifyEmailAddressServices = async (email) => {
   }
 };
 
-// verify emial address
+// verify email address
 const verifyEmailAddressServices = async (token) => {
   let transaction;
 
@@ -603,19 +603,19 @@ const verifyEmailAddressServices = async (token) => {
 
     const account = await Account.findOne({
       where: { email: decoded.email },
-      include: [{ model: EmailConfirmation }],
+      include: [{ model: EmailConfirmation, as: "email_confirmation" }],
     });
 
     // Return if have no account => token fake
     if (
       !account ||
       account.length === 0 ||
-      decoded.email !== account.EmailConfirmation.email
+      decoded.email !== account.email_confirmation.email
     ) {
       return { success: false, code: 404, data: { msg: "Invalid token" } };
     }
 
-    if (account.EmailConfirmation.token === token) {
+    if (account.email_confirmation.token_verify_email === token) {
       return {
         success: false,
         code: 400,
@@ -641,7 +641,7 @@ const verifyEmailAddressServices = async (token) => {
       };
     }
 
-    const updateEmailConfirmation = await account.EmailConfirmation.update(
+    const updateEmailConfirmation = await account.email_confirmation.update(
       {
         token_verify_email: token,
         updated_at: sequelize.literal("NOW()"),

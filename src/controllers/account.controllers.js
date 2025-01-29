@@ -219,13 +219,10 @@ const login = [
 const verifyEmailAddress = async (req, res) => {
   try {
     const { token } = req.query;
+    console.log(token);
     const verifyEmailAddressResult = await verifyEmailAddressServices(token);
 
-    if (verifyEmailAddressResult.success) {
-      res.redirect(`${process.env.FRONTEND_URL}/`);
-    }
-
-    res.redirect(`${process.env.FRONTEND_URL}/verify-email`);
+    res.status(verifyEmailAddressResult.code).send(verifyEmailAddressResult);
   } catch (error) {
     res.status(500).send({ success: false, data: { msg: error.message } });
   }

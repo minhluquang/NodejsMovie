@@ -25,7 +25,7 @@ accountRouter.put("/", updateAccount);
 accountRouter.delete("/:account_id", deleteAccount);
 accountRouter.get("/verify-OTP-email-address", verifyOTPEmailAddress);
 accountRouter.post("/login", login);
-accountRouter.get("/verify-email", verifyEmailAddress);
+accountRouter.put("/verify-email", verifyEmailAddress);
 accountRouter.put("/reset-password", resetPassword);
 accountRouter.post("/reset-password", verifyChangePassword);
 accountRouter.post(
