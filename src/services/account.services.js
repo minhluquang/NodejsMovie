@@ -521,6 +521,18 @@ const loginServices = async (username, password) => {
       };
     }
 
+    const isVerifiedAccount = account.is_verified === 1;
+    if (!isVerifiedAccount) {
+      return {
+        success: false,
+        code: 401,
+        data: {
+          is_verified: false,
+          msg: "Account is not verified. Please check your email for verification.",
+        },
+      };
+    }
+
     // Gen the access token
     const payload = {
       username: account.username,
@@ -553,8 +565,8 @@ const sendVerifyEmailAddressServices = async (email) => {
     // Return if have no account
     if (!account || account.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account found" },
       };
     }
@@ -684,8 +696,8 @@ const verifyChangePasswordServices = async (
     // Return if have no account
     if (!account || account.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account found" },
       };
     }

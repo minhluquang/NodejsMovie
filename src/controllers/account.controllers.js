@@ -219,7 +219,6 @@ const login = [
 const verifyEmailAddress = async (req, res) => {
   try {
     const { token } = req.query;
-    console.log(token);
     const verifyEmailAddressResult = await verifyEmailAddressServices(token);
 
     res.status(verifyEmailAddressResult.code).send(verifyEmailAddressResult);
