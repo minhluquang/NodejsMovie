@@ -1,5 +1,4 @@
 require("dotenv").config();
-const axios = require("axios");
 const { body, query, validationResult } = require("express-validator");
 const {
   getAllAccountsServices,
@@ -38,7 +37,6 @@ const getAccount = [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-
         data: errors.array(),
       });
     }
