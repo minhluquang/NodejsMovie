@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      tvEpisode.hasMany(models.tvEpisodePeople, {
+        foreignKey: "tv_episode_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
 

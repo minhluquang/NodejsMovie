@@ -9,11 +9,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      // Account.belongsTo(models.Role, {
-      //   foreignKey: "role_id",
-      //   onDelete: "CASCADE",
-      //   onUpdate: "CASCADE",
-      // });
+      Movie.hasMany(models.MoviePeople, {
+        foreignKey: "movie_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   Movie.init(

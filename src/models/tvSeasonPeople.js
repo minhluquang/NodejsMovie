@@ -2,77 +2,57 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class tvSeason extends Model {
+  class TvSeasonPeople extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
-      tvSeason.belongsTo(models.tvSeries, {
-        foreignKey: "tv_series_id",
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      });
-      tvSeason.hasMany(models.tvEpisode, {
+      // Define associations here
+      TvSeasonPeople.belongsTo(models.tvSeason, {
         foreignKey: "tv_season_id",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
-      tvSeason.hasMany(models.tvSeasonPeople, {
-        foreignKey: "tv_season_id",
+      TvSeasonPeople.belongsTo(models.People, {
+        foreignKey: "person_id",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
     }
   }
 
-  tvSeason.init(
+  TvSeasonPeople.init(
     {
       tv_season_id: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         primaryKey: true,
-        autoIncrement: true,
       },
-      tv_series_id: {
+      person_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "tvSeries",
-          key: "tv_series_id",
-        },
+        primaryKey: true,
       },
-      air_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
-      name: {
+      character_role: {
         type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      overview: {
-        type: DataTypes.STRING(500),
         allowNull: true,
       },
-      poster_path: {
-        type: DataTypes.STRING(500),
+      job: {
+        type: DataTypes.STRING(100),
         allowNull: true,
       },
-      season_number: {
-        type: DataTypes.SMALLINT(6),
-        allowNull: false,
+      department: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
       },
-      vote_average: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-      },
-      createdAt: {
+      created_at: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
-      updatedAt: {
+      updated_at: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
@@ -80,11 +60,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "tvSeason",
-      tableName: "tv_seasons",
-      timestamps: true,
+      modelName: "tvSeasonPeople",
+      tableName: "tv_season_people",
+      timestamps: false,
+      primaryKey: false,
     }
   );
 
-  return tvSeason;
+  return TvSeasonPeople;
 };
