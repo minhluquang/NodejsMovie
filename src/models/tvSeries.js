@@ -72,7 +72,8 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       popularity: {
-        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        type: DataTypes.DOUBLE,
         allowNull: false,
       },
       vote_average: {

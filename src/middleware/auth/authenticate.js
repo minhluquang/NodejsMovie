@@ -1,11 +1,15 @@
 require("dotenv").config();
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authenticate = (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1]; // Assumes the token is sent as Bearer <token>
 
   if (!token) {
-    return res.status(401).json({ message: "Access denied, token missing!" });
+    return res.status(401).json({
+      success: false,
+      code: 401,
+      data: { message: "Access denied, token missing!" },
+    });
   }
 
   try {
@@ -14,7 +18,11 @@ const authenticate = (req, res, next) => {
     req.user = decoded; // Attach user info to the request object
     next(); // Proceed to the next middleware or route handler
   } catch (err) {
-    return res.status(400).json({ message: "Invalid or expired token!" });
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      data: { message: "Invalid or expired token!" },
+    });
   }
 };
 

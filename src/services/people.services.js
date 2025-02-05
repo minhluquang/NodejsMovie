@@ -12,7 +12,7 @@ const {
 const { Op } = require("sequelize");
 
 // Get all account
-const getTopTenPeopleServices = async (number) => {
+const getTopPeopleServices = async (number) => {
   try {
     const limit = parseInt(number, 10);
     const topPeople = await People.findAll({
@@ -74,4 +74,4 @@ const getTopTenPeopleServices = async (number) => {
   }
 };
 
-module.exports = { getTopTenPeopleServices };
+module.exports = { getTopPeopleServices };

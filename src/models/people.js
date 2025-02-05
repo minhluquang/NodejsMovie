@@ -79,6 +79,7 @@ module.exports = (sequelize, DataTypes) => {
       popularity: {
         type: DataTypes.DOUBLE,
         allowNull: false,
+        defaultValue: 0,
       },
       createdAt: {
         type: DataTypes.DATE,

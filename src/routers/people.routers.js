@@ -1,8 +1,8 @@
 const express = require("express");
-const { getTopTenPeople } = require("../controllers/people.controllers");
+const { getTopPeople } = require("../controllers/people.controllers");
 
 const peopleRouter = express.Router();
 
-peopleRouter.get("/top/:number", getTopTenPeople);
+peopleRouter.get("/top/:number", getTopPeople);
 
 module.exports = { peopleRouter };
