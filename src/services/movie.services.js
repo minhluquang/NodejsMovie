@@ -199,7 +199,7 @@ const getDetailMovieServices = async (movie_id) => {
             },
           },
           limit: 1,
-          order: [["added_at", "desc"]],
+          order: [[{ model: Review }, "createdAt", "DESC"]],
         },
       ],
     });
@@ -244,6 +244,25 @@ const getDetailMovieServices = async (movie_id) => {
       character_role: k.character_role,
       profile_path: k.Person.profile_path,
       name: k.Person.name,
+    }));
+
+    // remove/add attributes (not) use in reviews
+    const reviewCount = await MovieReview.count({
+      where: { movie_id },
+    });
+
+    result.reviews = result.reviews.map((k) => ({
+      total_reviews: reviewCount,
+      review_id: k.review_id,
+      content: k.Review.content,
+      rating: k.Review.rating,
+      author: {
+        account_id: k.Review.Account.account_id,
+        username: k.Review.Account.username || null,
+        name: k.Review.Account.name || null,
+        profile_picture: k.Review.Account.profile_picture || null,
+      },
+      created_at: k.Review.createdAt,
     }));
 
     // Return if have movie

@@ -65,7 +65,15 @@ const getLastAirSeason = async (tv_series_id) => {
   try {
     const lastAirSeason = await tvSeason.findOne({
       where: { tv_series_id, air_date: { [Op.lte]: new Date() } },
-      order: [["air_date", "desc"]],
+      include: {
+        model: tvEpisode,
+        where: { air_date: { [Op.lte]: new Date() } },
+      },
+      order: [
+        [tvEpisode, "air_date", "desc"],
+        [tvEpisode, "episode_number", "desc"],
+        ["air_date", "desc"],
+      ],
       limit: 1,
     });
 

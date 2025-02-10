@@ -15,6 +15,10 @@ const {
   People,
   Keyword,
   TVSeriesKeyword,
+  TVSeriesReview,
+  Review,
+  Account,
+  AccountDetail,
 } = require("../models");
 const {
   getLastAirEpisode,
@@ -117,6 +121,19 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
           as: "keywords",
           include: { model: Keyword },
         },
+        {
+          model: TVSeriesReview,
+          as: "reviews",
+          include: {
+            model: Review,
+            include: {
+              model: Account,
+              include: { model: AccountDetail, as: "account_detail" },
+            },
+          },
+          limit: 1,
+          order: [[{ model: Review }, "createdAt", "DESC"]],
+        },
       ],
     });
 
@@ -155,6 +172,50 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
       name: k.Keyword.name,
     }));
 
+    // remove/add attributes (not) use in reviews
+    const reviewCount = await TVSeriesReview.count({
+      where: { tv_series_id },
+    });
+
+    result.reviews = result.reviews.map((k) => ({
+      total_reviews: reviewCount,
+      review_id: k.review_id,
+      content: k.Review.content,
+      rating: k.Review.rating,
+      author: {
+        account_id: k.Review.Account.account_id,
+        username: k.Review.Account.username || null,
+        name: k.Review.Account.name || null,
+        profile_picture: k.Review.Account.profile_picture || null,
+      },
+      created_at: k.Review.createdAt,
+    }));
+
+    // create tv_season attr
+    const episodeCount = await tvEpisode.count({
+      where: { tv_season_id: lastAirSeason.tv_season_id },
+    });
+
+    result.last_air_season = {
+      tv_season_id: lastAirSeason.tv_season_id,
+      air_date: lastAirSeason.air_date,
+      name: lastAirSeason.name,
+      overview: lastAirSeason.overview,
+      poster_path: lastAirSeason.poster_path,
+      season_number: lastAirSeason.season_number,
+      total_episodes: episodeCount,
+      vote_average: lastAirSeason.vote_average,
+      vote_average: lastAirSeason.vote_average,
+    };
+
+    result.last_episode_to_air = {
+      tv_episode_id: lastAirSeason.tvEpisodes[0].tv_episode_id,
+      air_date: lastAirSeason.tvEpisodes[0].air_date,
+      episode_number: lastAirSeason.tvEpisodes[0].episode_number,
+      episode_type: lastAirSeason.tvEpisodes[0].episode_type,
+      name: lastAirSeason.tvEpisodes[0].name,
+    };
+
     // remove attributes not use in credits (tv seasons)
     const season = result.tvSeasons[0]; //tvSeason at 0 index cuz only one season we get (last air tv season)
     if (season.credits && Array.isArray(season.credits)) {
@@ -169,7 +230,7 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
     // remove tvSeason, cuz we don't need it
     delete result.tvSeasons;
 
-    // Return if have movie
+    // Return if have tv series
     return { success: true, code: 200, data: result };
   } catch (error) {
     throw error;
