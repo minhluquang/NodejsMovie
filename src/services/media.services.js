@@ -3,7 +3,7 @@ const { Movie, tvSeries, tvSeason } = require("../models");
 const {
   getLastAirEpisode,
   getNextAirEpisode,
-  getLastAirSeasons,
+  getNextAirSeasons,
 } = require("./tvSeason.services");
 
 const getTrendingMediasServices = async (type) => {

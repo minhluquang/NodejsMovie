@@ -43,7 +43,7 @@ const getNextAirEpisode = async (tv_series_id) => {
   }
 };
 
-const getLastAirSeason = async (tv_series_id) => {
+const getNextAirSeason = async (tv_series_id) => {
   try {
     const nextAirSeason = await tvSeason.findOne({
       where: { tv_series_id, air_date: { [Op.gte]: new Date() } },
@@ -61,4 +61,23 @@ const getLastAirSeason = async (tv_series_id) => {
   }
 };
 
-module.exports = { getLastAirEpisode, getNextAirEpisode, getLastAirSeason };
+const getLastAirSeason = async (tv_series_id) => {
+  try {
+    const lastAirSeason = await tvSeason.findOne({
+      where: { tv_series_id, air_date: { [Op.lte]: new Date() } },
+      order: [["air_date", "desc"]],
+      limit: 1,
+    });
+
+    return lastAirSeason || null;
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = {
+  getLastAirEpisode,
+  getNextAirEpisode,
+  getNextAirSeason,
+  getLastAirSeason,
+};

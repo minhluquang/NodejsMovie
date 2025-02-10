@@ -14,6 +14,36 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      tvSeries.hasMany(models.TVSeriesCertification, {
+        foreignKey: "tv_series_id",
+        as: "certifications",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      tvSeries.hasMany(models.TVSeriesGenre, {
+        foreignKey: "tv_series_id",
+        as: "genres",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      tvSeries.hasMany(models.TVSeriesNetwork, {
+        foreignKey: "tv_series_id",
+        as: "networks",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      tvSeries.hasMany(models.SocialNetworkDetail, {
+        foreignKey: "tv_series_id",
+        as: "social_networks",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      tvSeries.hasMany(models.TVSeriesKeyword, {
+        foreignKey: "tv_series_id",
+        as: "keywords",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   tvSeries.init(

@@ -24,6 +24,11 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      SocialNetworkDetail.belongsTo(models.tvSeries, {
+        foreignKey: "tv_series_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   SocialNetworkDetail.init(

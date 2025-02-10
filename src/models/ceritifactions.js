@@ -14,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      Certification.hasMany(models.TVSeriesCertification, {
+        foreignKey: "certification_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   Certification.init(
