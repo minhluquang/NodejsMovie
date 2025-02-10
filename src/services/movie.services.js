@@ -1,5 +1,21 @@
-const { Op, where } = require("sequelize");
-const { Movie } = require("../models");
+const { Op } = require("sequelize");
+const {
+  Movie,
+  MovieKeyword,
+  Keyword,
+  MovieGenre,
+  Genre,
+  MovieCertification,
+  Certification,
+  SocialNetworkDetail,
+  SocialNetwork,
+  MoviePeople,
+  People,
+  MovieReview,
+  Review,
+  Account,
+  AccountDetail,
+} = require("../models");
 
 const getTrendingMoviesServices = async (type) => {
   try {
@@ -131,7 +147,114 @@ const getUpcomingMoviesServices = async () => {
   }
 };
 
+// Get detail movie
+const getDetailMovieServices = async (movie_id) => {
+  try {
+    const detailMovie = await Movie.findOne({
+      where: { movie_id },
+      include: [
+        {
+          model: MovieKeyword,
+          as: "keywords",
+          include: {
+            model: Keyword,
+          },
+        },
+        {
+          model: MovieGenre,
+          as: "genres",
+          include: {
+            model: Genre,
+          },
+        },
+        {
+          model: MovieCertification,
+          as: "certifications",
+          include: {
+            model: Certification,
+          },
+        },
+        {
+          model: SocialNetworkDetail,
+          as: "social_networks",
+          include: {
+            model: SocialNetwork,
+          },
+        },
+        {
+          model: MoviePeople,
+          as: "credits",
+          include: { model: People },
+          limit: 9,
+          order: [[{ model: People }, "popularity", "desc"]],
+        },
+        {
+          model: MovieReview,
+          as: "reviews",
+          include: {
+            model: Review,
+            include: {
+              model: Account,
+              include: { model: AccountDetail, as: "account_detail" },
+            },
+          },
+          limit: 1,
+          order: [["added_at", "desc"]],
+        },
+      ],
+    });
+
+    if (!detailMovie || detailMovie.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No movie found" },
+      };
+    }
+
+    // remove attributes not use in keywords
+    const result = detailMovie.toJSON();
+    result.keywords = result.keywords.map((k) => ({
+      keyword_id: k.Keyword.keyword_id,
+      name: k.Keyword.name,
+    }));
+
+    // remove attributes not use in genres
+    result.genres = result.genres.map((k) => ({
+      genre_id: k.Genre.genre_id,
+      name: k.Genre.name,
+    }));
+
+    // remove attributes not use in certification
+    result.certifications = result.certifications.map((k) => ({
+      certification_id: k.Certification.certification_id,
+      certification: k.Certification.certification,
+    }));
+
+    // remove attributes not use in social network
+    result.social_networks = result.social_networks.map((k) => ({
+      social_network_id: k.social_network_id,
+      platform: k.SocialNetwork.platform,
+      social_network_username: k.social_network_username,
+    }));
+
+    // remove attributes not use in credits
+    result.credits = result.credits.map((k) => ({
+      person_id: k.person_id,
+      character_role: k.character_role,
+      profile_path: k.Person.profile_path,
+      name: k.Person.name,
+    }));
+
+    // Return if have movie
+    return { success: true, code: 200, data: result };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getTrendingMoviesServices,
   getUpcomingMoviesServices,
+  getDetailMovieServices,
 };

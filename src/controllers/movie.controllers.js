@@ -2,6 +2,7 @@ const { body, param, validationResult } = require("express-validator");
 const {
   getTrendingMoviesServices,
   getUpcomingMoviesServices,
+  getDetailMovieServices,
 } = require("../services/movie.services");
 
 // Get movie trending (today/this week)
@@ -42,7 +43,19 @@ const getUpcomingMovies = async (req, res) => {
   }
 };
 
+// Get detail movie
+const getDetailMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await getDetailMovieServices(id);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getTrendingMovies,
   getUpcomingMovies,
+  getDetailMovie,
 };

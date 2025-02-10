@@ -11,6 +11,37 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Movie.hasMany(models.MoviePeople, {
         foreignKey: "movie_id",
+        as: "credits",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      Movie.hasMany(models.MovieKeyword, {
+        foreignKey: "movie_id",
+        as: "keywords",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      Movie.hasMany(models.MovieGenre, {
+        foreignKey: "movie_id",
+        as: "genres",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      Movie.hasMany(models.MovieCertification, {
+        foreignKey: "movie_id",
+        as: "certifications",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      Movie.hasMany(models.SocialNetworkDetail, {
+        foreignKey: "movie_id",
+        as: "social_networks",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      Movie.hasMany(models.MovieReview, {
+        foreignKey: "movie_id",
+        as: "reviews",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
