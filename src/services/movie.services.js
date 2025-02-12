@@ -313,7 +313,6 @@ const getAllMovieImagesServices = async (movie_id) => {
       }
 
       const {
-        movie_image_id,
         aspect_ratio,
         iso_639_1,
         height,
@@ -324,7 +323,6 @@ const getAllMovieImagesServices = async (movie_id) => {
       } = image.dataValues;
 
       acc[type].push({
-        movie_image_id,
         aspect_ratio,
         iso_639_1,
         height,
@@ -362,7 +360,6 @@ const getAllMovieVideosServices = async (movie_id) => {
 
     // remove attributes not use in movieVideos
     movieVideos = movieVideos.map((k) => ({
-      movie_video_id: k.movie_video_id,
       name: k.name,
       key: k.key,
       site: k.site,
@@ -371,7 +368,6 @@ const getAllMovieVideosServices = async (movie_id) => {
       published_at: k.published_at,
     }));
 
-    // Return if have movie
     return { success: true, code: 200, data: movieVideos };
   } catch (error) {
     throw error;

@@ -21,6 +21,7 @@ const {
   AccountDetail,
   TVSeriesProductionCompany,
   ProductionCompany,
+  TVSeriesImage,
 } = require("../models");
 const {
   getLastAirEpisode,
@@ -252,4 +253,116 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
   }
 };
 
-module.exports = { getPopularTVSeriesServices, getDetailTVSeriesServices };
+const getAllTVSeriesImagesServices = async (tv_series_id) => {
+  try {
+    const tvSeriesImages = await TVSeriesImage.findAll({
+      where: { tv_series_id, season: null, episode: null },
+    });
+
+    if (!tvSeriesImages || tvSeriesImages.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No tv series image found" },
+      };
+    }
+
+    const groupedImages = tvSeriesImages.reduce((acc, image) => {
+      const type = image.type;
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+
+      const {
+        aspect_ratio,
+        height,
+        width,
+        iso_639_1,
+        file_path,
+        vote_average,
+        vote_count,
+      } = image.dataValues;
+
+      acc[type].push({
+        aspect_ratio,
+        height,
+        width,
+        iso_639_1,
+        file_path,
+        vote_average,
+        vote_count,
+      });
+      return acc;
+    }, {});
+
+    return {
+      success: true,
+      code: 200,
+      data: groupedImages,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getAllTVSeriesSeasonImagesServices = async (
+  tv_series_id,
+  season_number
+) => {
+  try {
+    const tvSeriesSeasonImages = await TVSeriesImage.findAll({
+      where: { tv_series_id, season: season_number, episode: null },
+    });
+
+    if (!tvSeriesSeasonImages || tvSeriesSeasonImages.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No tv series image found" },
+      };
+    }
+
+    const groupedImages = tvSeriesSeasonImages.reduce((acc, image) => {
+      const type = image.type;
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+
+      const {
+        aspect_ratio,
+        height,
+        width,
+        iso_639_1,
+        file_path,
+        vote_average,
+        vote_count,
+      } = image.dataValues;
+
+      acc[type].push({
+        aspect_ratio,
+        height,
+        width,
+        iso_639_1,
+        file_path,
+        vote_average,
+        vote_count,
+      });
+      return acc;
+    }, {});
+
+    return {
+      success: true,
+      code: 200,
+      data: groupedImages,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = {
+  getPopularTVSeriesServices,
+  getDetailTVSeriesServices,
+  getAllTVSeriesImagesServices,
+  getAllTVSeriesSeasonImagesServices,
+};
