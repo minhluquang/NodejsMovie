@@ -45,6 +45,12 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      Movie.hasMany(models.MovieProductionCompany, {
+        foreignKey: "movie_id",
+        as: "production_companies",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   Movie.init(

@@ -67,10 +67,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TINYINT(1),
         allowNull: false,
       },
-      popularity: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-      },
       published_at: {
         type: DataTypes.DATE,
         allowNull: false,

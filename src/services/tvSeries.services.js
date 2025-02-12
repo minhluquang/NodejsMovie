@@ -19,6 +19,8 @@ const {
   Review,
   Account,
   AccountDetail,
+  TVSeriesProductionCompany,
+  ProductionCompany,
 } = require("../models");
 const {
   getLastAirEpisode,
@@ -134,6 +136,11 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
           limit: 1,
           order: [[{ model: Review }, "createdAt", "DESC"]],
         },
+        {
+          model: TVSeriesProductionCompany,
+          as: "production_companies",
+          include: { model: ProductionCompany },
+        },
       ],
     });
 
@@ -170,6 +177,14 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
     result.keywords = result.keywords.map((k) => ({
       keyword_id: k.Keyword.keyword_id,
       name: k.Keyword.name,
+    }));
+
+    // remove attributes not use in production_companies
+    result.production_companies = result.production_companies.map((k) => ({
+      production_company_id: k.ProductionCompany.production_company_id,
+      name: k.ProductionCompany.name,
+      original_country: k.ProductionCompany.original_country,
+      logo_path: k.ProductionCompany.logo_path,
     }));
 
     // remove/add attributes (not) use in reviews

@@ -15,6 +15,10 @@ const {
   Review,
   Account,
   AccountDetail,
+  MovieProductionCompany,
+  ProductionCompany,
+  MovieImage,
+  MovieVideo,
 } = require("../models");
 
 const getTrendingMoviesServices = async (type) => {
@@ -201,6 +205,13 @@ const getDetailMovieServices = async (movie_id) => {
           limit: 1,
           order: [[{ model: Review }, "createdAt", "DESC"]],
         },
+        {
+          model: MovieProductionCompany,
+          as: "production_companies",
+          include: {
+            model: ProductionCompany,
+          },
+        },
       ],
     });
 
@@ -246,6 +257,14 @@ const getDetailMovieServices = async (movie_id) => {
       name: k.Person.name,
     }));
 
+    // remove attributes not use in production_companies
+    result.production_companies = result.production_companies.map((k) => ({
+      production_company_id: k.ProductionCompany.production_company_id,
+      name: k.ProductionCompany.name,
+      original_country: k.ProductionCompany.original_country,
+      logo_path: k.ProductionCompany.logo_path,
+    }));
+
     // remove/add attributes (not) use in reviews
     const reviewCount = await MovieReview.count({
       where: { movie_id },
@@ -272,8 +291,97 @@ const getDetailMovieServices = async (movie_id) => {
   }
 };
 
+// get images of movie by movie_id
+const getAllMovieImagesServices = async (movie_id) => {
+  try {
+    const movieImages = await MovieImage.findAll({
+      where: { movie_id },
+    });
+
+    if (!movieImages || movieImages.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No image found." },
+      };
+    }
+
+    const groupedImages = movieImages.reduce((acc, image) => {
+      const type = image.type;
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+
+      const {
+        movie_image_id,
+        aspect_ratio,
+        iso_639_1,
+        height,
+        width,
+        file_path,
+        vote_average,
+        vote_count,
+      } = image.dataValues;
+
+      acc[type].push({
+        movie_image_id,
+        aspect_ratio,
+        iso_639_1,
+        height,
+        width,
+        file_path,
+        vote_average,
+        vote_count,
+      });
+      return acc;
+    }, {});
+
+    // remove attributes not use in groupedImages
+
+    // Return if have movie
+    return { success: true, code: 200, data: groupedImages };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// get videos of movie by movie_id
+const getAllMovieVideosServices = async (movie_id) => {
+  try {
+    let movieVideos = await MovieVideo.findAll({
+      where: { movie_id },
+    });
+
+    if (!movieVideos || movieVideos.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No video found." },
+      };
+    }
+
+    // remove attributes not use in movieVideos
+    movieVideos = movieVideos.map((k) => ({
+      movie_video_id: k.movie_video_id,
+      name: k.name,
+      key: k.key,
+      site: k.site,
+      type: k.type,
+      official: k.official === 1,
+      published_at: k.published_at,
+    }));
+
+    // Return if have movie
+    return { success: true, code: 200, data: movieVideos };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getTrendingMoviesServices,
   getUpcomingMoviesServices,
   getDetailMovieServices,
+  getAllMovieImagesServices,
+  getAllMovieVideosServices,
 };

@@ -68,8 +68,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(500),
         allowNull: false,
       },
+      type: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+      },
       vote_average: {
         type: DataTypes.FLOAT,
+        allowNull: false,
+      },
+      vote_count: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       createdAt: {

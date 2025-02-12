@@ -50,6 +50,12 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      tvSeries.hasMany(models.TVSeriesProductionCompany, {
+        foreignKey: "tv_series_id",
+        as: "production_companies",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   tvSeries.init(
