@@ -22,6 +22,7 @@ const {
   TVSeriesProductionCompany,
   ProductionCompany,
   TVSeriesImage,
+  TVSeriesVideo,
 } = require("../models");
 const {
   getLastAirEpisode,
@@ -360,9 +361,175 @@ const getAllTVSeriesSeasonImagesServices = async (
   }
 };
 
+const getAllTVSeriesSeasonEpisodeImagesServices = async (
+  tv_series_id,
+  season_number,
+  episode_number
+) => {
+  try {
+    const tvSeriesSeasonEpisodeImages = await TVSeriesImage.findAll({
+      where: { tv_series_id, season: season_number, episode: episode_number },
+    });
+
+    if (
+      !tvSeriesSeasonEpisodeImages ||
+      tvSeriesSeasonEpisodeImages.length === 0
+    ) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No tv series image found" },
+      };
+    }
+
+    const groupedImages = tvSeriesSeasonEpisodeImages.reduce((acc, image) => {
+      const type = image.type;
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+
+      const {
+        aspect_ratio,
+        height,
+        width,
+        iso_639_1,
+        file_path,
+        vote_average,
+        vote_count,
+      } = image.dataValues;
+
+      acc[type].push({
+        aspect_ratio,
+        height,
+        width,
+        iso_639_1,
+        file_path,
+        vote_average,
+        vote_count,
+      });
+      return acc;
+    }, {});
+
+    return {
+      success: true,
+      code: 200,
+      data: groupedImages,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// get videos of tv_series by tv_series_id
+const getAllTVSeriesVideosServices = async (tv_series_id) => {
+  try {
+    let tvSeriesVideos = await TVSeriesVideo.findAll({
+      where: { tv_series_id, season: null, episode: null },
+    });
+
+    if (!tvSeriesVideos || tvSeriesVideos.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No video found." },
+      };
+    }
+
+    // remove attributes not use in tvSeriesVideos
+    tvSeriesVideos = tvSeriesVideos.map((k) => ({
+      name: k.name,
+      key: k.key,
+      site: k.site,
+      type: k.type,
+      official: k.official === 1,
+      published_at: k.published_at,
+    }));
+
+    return { success: true, code: 200, data: tvSeriesVideos };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// get videos of tv_seasons by tv_series_id
+const getAllTVSeriesSeasonVideosServices = async (
+  tv_series_id,
+  season_number
+) => {
+  try {
+    let tvSeriesSeasonVideos = await TVSeriesVideo.findAll({
+      where: { tv_series_id, season: season_number, episode: null },
+    });
+
+    if (!tvSeriesSeasonVideos || tvSeriesSeasonVideos.length === 0) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No video found." },
+      };
+    }
+
+    // remove attributes not use in tvSeriesSeasonVideos
+    tvSeriesSeasonVideos = tvSeriesSeasonVideos.map((k) => ({
+      name: k.name,
+      key: k.key,
+      site: k.site,
+      type: k.type,
+      official: k.official === 1,
+      published_at: k.published_at,
+    }));
+
+    return { success: true, code: 200, data: tvSeriesSeasonVideos };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// get videos of tv_episodes by tv_series_id
+const getAllTVSeriesSeasonEpisodeVideosServices = async (
+  tv_series_id,
+  season_number,
+  episode_number
+) => {
+  try {
+    let tvSeriesSeasonEpisodeVideos = await TVSeriesVideo.findAll({
+      where: { tv_series_id, season: season_number, episode: episode_number },
+    });
+
+    if (
+      !tvSeriesSeasonEpisodeVideos ||
+      tvSeriesSeasonEpisodeVideos.length === 0
+    ) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "No video found." },
+      };
+    }
+
+    // remove attributes not use in tvSeriesSeasonVideos
+    tvSeriesSeasonEpisodeVideos = tvSeriesSeasonEpisodeVideos.map((k) => ({
+      name: k.name,
+      key: k.key,
+      site: k.site,
+      type: k.type,
+      official: k.official === 1,
+      published_at: k.published_at,
+    }));
+
+    return { success: true, code: 200, data: tvSeriesSeasonEpisodeVideos };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getPopularTVSeriesServices,
   getDetailTVSeriesServices,
   getAllTVSeriesImagesServices,
   getAllTVSeriesSeasonImagesServices,
+  getAllTVSeriesSeasonEpisodeImagesServices,
+  getAllTVSeriesVideosServices,
+  getAllTVSeriesSeasonVideosServices,
+  getAllTVSeriesSeasonEpisodeVideosServices,
 };
