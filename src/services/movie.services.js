@@ -361,7 +361,7 @@ const getAllMovieVideosServices = async (movie_id) => {
     // remove attributes not use in movieVideos
     movieVideos = movieVideos.map((k) => ({
       name: k.name,
-      key: k.key,
+      key: k.video_key,
       site: k.site,
       type: k.type,
       official: k.official === 1,

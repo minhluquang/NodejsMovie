@@ -1,5 +1,10 @@
 const { body, param, validationResult } = require("express-validator");
-const { getTrendingMediasServices } = require("../services/media.services");
+const {
+  getTrendingMediasServices,
+  getAllMovieMultiMediaSerices,
+  getAllTVSeriesMultiMediaServices,
+  getVideoTrailersServices,
+} = require("../services/media.services");
 
 // Get movie trending (today/this week)
 const getTrendingMedias = [
@@ -29,6 +34,41 @@ const getTrendingMedias = [
   },
 ];
 
+// Get all video & image of movie by movie_id
+const getAllMovieMultiMedia = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await getAllMovieMultiMediaSerices(id);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Get all video & image of tv by tv_series_id
+const getAllTVSeriesMultiMedia = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await getAllTVSeriesMultiMediaServices(id);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Get video trailer for home page
+const getVideoTrailers = async (req, res) => {
+  try {
+    const result = await getVideoTrailersServices();
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getTrendingMedias,
+  getAllMovieMultiMedia,
+  getAllTVSeriesMultiMedia,
+  getVideoTrailers,
 };

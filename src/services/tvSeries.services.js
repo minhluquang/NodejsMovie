@@ -438,7 +438,7 @@ const getAllTVSeriesVideosServices = async (tv_series_id) => {
     // remove attributes not use in tvSeriesVideos
     tvSeriesVideos = tvSeriesVideos.map((k) => ({
       name: k.name,
-      key: k.key,
+      key: k.video_key,
       site: k.site,
       type: k.type,
       official: k.official === 1,
@@ -472,7 +472,7 @@ const getAllTVSeriesSeasonVideosServices = async (
     // remove attributes not use in tvSeriesSeasonVideos
     tvSeriesSeasonVideos = tvSeriesSeasonVideos.map((k) => ({
       name: k.name,
-      key: k.key,
+      key: k.video_key,
       site: k.site,
       type: k.type,
       official: k.official === 1,
@@ -510,7 +510,7 @@ const getAllTVSeriesSeasonEpisodeVideosServices = async (
     // remove attributes not use in tvSeriesSeasonVideos
     tvSeriesSeasonEpisodeVideos = tvSeriesSeasonEpisodeVideos.map((k) => ({
       name: k.name,
-      key: k.key,
+      key: k.video_key,
       site: k.site,
       type: k.type,
       official: k.official === 1,

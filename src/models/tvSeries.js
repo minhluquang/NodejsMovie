@@ -113,6 +113,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(20),
         allowNull: false,
       },
+      type: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+      },
       popularity: {
         defaultValue: 0,
         type: DataTypes.DOUBLE,
