@@ -8,6 +8,7 @@ const {
   getAllTVSeriesVideos,
   getAllTVSeriesSeasonVideos,
   getAllTVSeriesSeasonEpisodeVideos,
+  getDetailSeason,
 } = require("../controllers/tvSeries.controllers");
 
 const tvSeriesRouter = express.Router();
@@ -32,5 +33,6 @@ tvSeriesRouter.get(
   "/:id/season/:season_number/episode/:episode_number/videos",
   getAllTVSeriesSeasonEpisodeVideos
 );
+tvSeriesRouter.get("/:id/season/:season_number", getDetailSeason);
 
 module.exports = { tvSeriesRouter };

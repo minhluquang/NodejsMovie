@@ -397,8 +397,8 @@ const getVideoTrailersServices = async () => {
       published_at: k.published_at,
       id: k.tv_series_id,
       backdrop_path: k.tvSery.backdrop_path,
-      title: k.tvSery.title,
-      original_title: k.tvSery.original_title,
+      title: k.tvSery.name,
+      original_title: k.tvSery.original_name,
       popularity: k.tvSery.popularity,
       vote_average: k.tvSery.vote_average,
       vote_count: k.tvSery.vote_count,
@@ -406,12 +406,15 @@ const getVideoTrailersServices = async () => {
     }));
 
     let combinedTrailers = [...movieVideoTrailer, ...tvSeriesTrailer];
-    combinedTrailers = _.orderBy(
-      combinedTrailers,
-      ["published_at", "popularity", "vote_count", "vote_average"],
-      ["desc", "desc", "desc", "desc"]
-    );
-    combinedTrailers = combinedTrailers.slice(0, 20);
+    combinedTrailers = _.chain(combinedTrailers)
+      .orderBy(["published_at"], ["desc"])
+      .uniqBy("id")
+      .orderBy(
+        ["popularity", "vote_count", "vote_average"],
+        ["desc", "desc", "desc"]
+      )
+      .take(20)
+      .value();
 
     return {
       success: true,

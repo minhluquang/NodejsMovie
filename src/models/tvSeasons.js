@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       tvSeason.hasMany(models.tvEpisode, {
         foreignKey: "tv_season_id",
+        as: "episodes",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
