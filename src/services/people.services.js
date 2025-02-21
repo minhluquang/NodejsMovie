@@ -62,8 +62,8 @@ const getTopPeopleServices = async (number) => {
 
     if (!topPeople || topPeople.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No people found" },
       };
     }

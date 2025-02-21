@@ -12,8 +12,8 @@ const getAccountDetailByAccountIDServices = async (account_id, transaction) => {
     // Return if have no social network details
     if (!accountDetail || accountDetail.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account detail found" },
       };
     }
@@ -43,8 +43,8 @@ const updateAccountDetailServices = async (
     // Return if have no account detail
     if (!accountDetail || accountDetail.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account detail found" },
       };
     }

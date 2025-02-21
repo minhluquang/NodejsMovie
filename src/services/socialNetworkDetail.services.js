@@ -9,8 +9,8 @@ const getAllSocialDetailsServices = async () => {
     // Return if have no social network details
     if (!socialNetworkDetails || socialNetworkDetails.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No social network details found" },
       };
     }
@@ -32,8 +32,8 @@ const getSocialNetworkDetailByAccountIDServices = async (account_id) => {
     // Return if have no social network details
     if (!socialNetworkDetail || socialNetworkDetail.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No social network detail found" },
       };
     }
@@ -89,8 +89,8 @@ const updateSocialNetworkDetailServices = async (
     // if affected rows = 0 => not found
     if (result[0] === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No records updated" },
       };
     }

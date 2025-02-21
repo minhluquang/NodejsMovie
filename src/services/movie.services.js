@@ -103,8 +103,8 @@ const getTrendingMoviesServices = async (type) => {
     // Return if have no movie
     if (!trendingMovies || trendingMovies.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No movies found" },
       };
     }
@@ -138,8 +138,8 @@ const getUpcomingMoviesServices = async () => {
     // Return if have no movie
     if (!upcomingMovie || upcomingMovie.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No upcoming movies found within the next 20 days." },
       };
     }
@@ -217,8 +217,8 @@ const getDetailMovieServices = async (movie_id) => {
 
     if (!detailMovie || detailMovie.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No movie found" },
       };
     }
@@ -300,8 +300,8 @@ const getAllMovieImagesServices = async (movie_id) => {
 
     if (!movieImages || movieImages.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No image found." },
       };
     }
@@ -352,8 +352,8 @@ const getAllMovieVideosServices = async (movie_id) => {
 
     if (!movieVideos || movieVideos.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No video found." },
       };
     }

@@ -45,9 +45,9 @@ const getPopularTVSeriesServices = async () => {
     // Return if have no movie
     if (!popularTVSeries || popularTVSeries.length === 0) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No tv series found" },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 
@@ -148,9 +148,9 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
 
     if (!detailTVSeries || detailTVSeries.length === 0) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No tv series found" },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 
@@ -226,12 +226,18 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
     };
 
     result.last_episode_to_air = {
-      tv_episode_id: lastAirSeason.tvEpisodes[0].tv_episode_id,
-      air_date: lastAirSeason.tvEpisodes[0].air_date,
-      episode_number: lastAirSeason.tvEpisodes[0].episode_number,
-      episode_type: lastAirSeason.tvEpisodes[0].episode_type,
-      name: lastAirSeason.tvEpisodes[0].name,
+      tv_episode_id: lastAirSeason.episodes[0].tv_episode_id,
+      air_date: lastAirSeason.episodes[0].air_date,
+      episode_number: lastAirSeason.episodes[0].episode_number,
+      episode_type: lastAirSeason.episodes[0].episode_type,
+      name: lastAirSeason.episodes[0].name,
     };
+
+    // Count seasons
+    const totalSeasons = await tvSeason.count({
+      where: { tv_series_id },
+    });
+    result.number_of_seasons = totalSeasons;
 
     // remove attributes not use in credits (tv seasons)
     const season = result.tvSeasons[0]; //tvSeason at 0 index cuz only one season we get (last air tv season)
@@ -262,9 +268,9 @@ const getAllTVSeriesImagesServices = async (tv_series_id) => {
 
     if (!tvSeriesImages || tvSeriesImages.length === 0) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No tv series image found" },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 
@@ -317,9 +323,9 @@ const getAllTVSeriesSeasonImagesServices = async (
 
     if (!tvSeriesSeasonImages || tvSeriesSeasonImages.length === 0) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No tv series image found" },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 
@@ -376,9 +382,9 @@ const getAllTVSeriesSeasonEpisodeImagesServices = async (
       tvSeriesSeasonEpisodeImages.length === 0
     ) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No tv series image found" },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 
@@ -429,9 +435,9 @@ const getAllTVSeriesVideosServices = async (tv_series_id) => {
 
     if (!tvSeriesVideos || tvSeriesVideos.length === 0) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No video found." },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 
@@ -463,9 +469,9 @@ const getAllTVSeriesSeasonVideosServices = async (
 
     if (!tvSeriesSeasonVideos || tvSeriesSeasonVideos.length === 0) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No video found." },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 
@@ -501,9 +507,9 @@ const getAllTVSeriesSeasonEpisodeVideosServices = async (
       tvSeriesSeasonEpisodeVideos.length === 0
     ) {
       return {
-        success: false,
-        code: 404,
-        data: { msg: "No video found." },
+        success: true,
+        code: 200,
+        data: [],
       };
     }
 

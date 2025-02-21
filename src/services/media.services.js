@@ -262,8 +262,8 @@ const getAllMovieMultiMediaSerices = async (movie_id) => {
 
     if (!movieImages.length && !movieVideos.length) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No media found." },
       };
     }
@@ -328,8 +328,8 @@ const getAllTVSeriesMultiMediaServices = async (tv_series_id) => {
 
     if (!tvSeriesImages.length && !tvSeriesVideos.length) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No media found." },
       };
     }
@@ -365,8 +365,8 @@ const getVideoTrailersServices = async () => {
 
     if (!movieVideoTrailer.length && !tvSeriesTrailer.length) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No video trailer found." },
       };
     }

@@ -37,8 +37,8 @@ const getAllAccountsServices = async () => {
     // Return if have no account
     if (!accounts || accounts.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No accounts found" },
       };
     }
@@ -62,8 +62,8 @@ const getAccountServices = async (username) => {
     // Return if have no account
     if (!account || account.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No accounts found" },
       };
     }
@@ -325,8 +325,8 @@ const deleteAccountServices = async (account_id) => {
     // Return if have no account
     if (!account || account.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No accounts found" },
       };
     }
@@ -341,8 +341,8 @@ const deleteAccountServices = async (account_id) => {
 
     if (updateAccount[0] === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account found to update." },
       };
     }
@@ -386,8 +386,8 @@ const verifyOTPEmailAddressServices = async (email, code) => {
     // Return if have no account
     if (!account || account.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account found" },
       };
     }
@@ -401,8 +401,8 @@ const verifyOTPEmailAddressServices = async (email, code) => {
     // Return if have no email confirmation
     if (!emailConfirmation || emailConfirmation.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No email confirmation found" },
       };
     }
@@ -435,7 +435,7 @@ const verifyOTPEmailAddressServices = async (email, code) => {
         await transaction.rollback();
         return {
           success: false,
-          code: 404,
+          code: 200,
           data: { msg: "No matching email confirmation found to update." },
         };
       }
@@ -452,7 +452,7 @@ const verifyOTPEmailAddressServices = async (email, code) => {
         await transaction.rollback();
         return {
           success: false,
-          code: 404,
+          code: 200,
           data: { msg: "No matching account found to update." },
         };
       }
@@ -506,8 +506,8 @@ const loginServices = async (username, password) => {
     // Return if have no account
     if (!account || account.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account found" },
       };
     }
@@ -624,7 +624,7 @@ const verifyEmailAddressServices = async (token) => {
       account.length === 0 ||
       decoded.email !== account.email_confirmation.email
     ) {
-      return { success: false, code: 404, data: { msg: "Invalid token" } };
+      return { success: false, code: 200, data: { msg: "Invalid token" } };
     }
 
     if (account.email_confirmation.token_verify_email === token) {
@@ -647,8 +647,8 @@ const verifyEmailAddressServices = async (token) => {
     if (updateAccount[0] === 0) {
       await transaction.rollback();
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No matching email found to update." },
       };
     }
@@ -664,8 +664,8 @@ const verifyEmailAddressServices = async (token) => {
     if (updateEmailConfirmation[0] === 0) {
       await transaction.rollback();
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No matching email found to update." },
       };
     }
@@ -755,8 +755,8 @@ const resetPasswordServices = async (username, newPassword, token) => {
     // Return if have no account
     if (!account || account.length === 0) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No account found" },
       };
     }

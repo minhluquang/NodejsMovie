@@ -13,16 +13,17 @@ const getLastAirEpisode = async (tv_series_id) => {
       where: { tv_series_id, air_date: { [Op.lte]: new Date() } },
       include: {
         model: tvEpisode,
+        as: "episodes",
         where: { air_date: { [Op.lte]: new Date() } },
       },
       order: [
         ["air_date", "desc"],
-        [tvEpisode, "episode_number", "desc"],
+        [{ model: tvEpisode, as: "episodes" }, "episode_number", "desc"],
       ],
       limit: 1,
     });
 
-    return lastAirEpisode?.tvEpisodes[0] || null;
+    return lastAirEpisode?.episodes[0] || null;
   } catch (error) {
     throw error;
   }
@@ -34,16 +35,17 @@ const getNextAirEpisode = async (tv_series_id) => {
       where: { tv_series_id, air_date: { [Op.gte]: new Date() } },
       include: {
         model: tvEpisode,
+        as: "episodes",
         where: { air_date: { [Op.gte]: new Date() } },
       },
       order: [
         ["air_date", "asc"],
-        [tvEpisode, "episode_number", "asc"],
+        [{ model: tvEpisode, as: "episodes" }, "episode_number", "desc"],
       ],
       limit: 1,
     });
 
-    return nextAirEpisode?.tvEpisodes[0] || null;
+    return nextAirEpisode?.episodes[0] || null;
   } catch (error) {
     throw error;
   }
@@ -55,6 +57,7 @@ const getNextAirSeason = async (tv_series_id) => {
       where: { tv_series_id, air_date: { [Op.gte]: new Date() } },
       include: {
         model: tvEpisode,
+        as: "episodes",
         where: { air_date: { [Op.gte]: new Date() } },
       },
       order: [["air_date", "asc"]],
@@ -73,11 +76,12 @@ const getLastAirSeason = async (tv_series_id) => {
       where: { tv_series_id, air_date: { [Op.lte]: new Date() } },
       include: {
         model: tvEpisode,
+        as: "episodes",
         where: { air_date: { [Op.lte]: new Date() } },
       },
       order: [
-        [tvEpisode, "air_date", "desc"],
-        [tvEpisode, "episode_number", "desc"],
+        [{ model: tvEpisode, as: "episodes" }, "air_date", "desc"],
+        [{ model: tvEpisode, as: "episodes" }, "episode_number", "desc"],
         ["air_date", "desc"],
       ],
       limit: 1,
@@ -119,16 +123,14 @@ const getDetailSeasonServices = async (tv_series_id, season_number) => {
           attributes: {
             exclude: ["created_at", "updated_at", "tv_episode_id"],
           },
-          raw: true,
-          nest: true,
         },
       },
     });
 
     if (!tvSeasonDetail) {
       return {
-        success: false,
-        code: 404,
+        success: true,
+        code: 200,
         data: { msg: "No tv season found." },
       };
     }
@@ -160,6 +162,9 @@ const getDetailSeasonServices = async (tv_series_id, season_number) => {
               guest_stars.push(person);
             }
           });
+
+          crew.sort((a, b) => b.popularity - a.popularity);
+          guest_stars.sort((a, b) => b.popularity - a.popularity);
 
           episode.crew = crew;
           episode.guest_stars = guest_stars;
