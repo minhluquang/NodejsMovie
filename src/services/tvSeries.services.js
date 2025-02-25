@@ -234,15 +234,35 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
     };
 
     // Count seasons
-    const totalSeasons = await tvSeason.findAndCountAll({
+    const totalSeasons = await tvSeason.findAll({
       where: { tv_series_id },
-      attributes: { exclude: ["createdAt", "updatedAt", "tv_season_id"] },
+      attributes: [
+        "tv_season_id",
+        "season_number",
+        "name",
+        "overview",
+        "air_date",
+        "poster_path",
+        "season_number",
+        "vote_average",
+        [
+          Sequelize.fn("COUNT", Sequelize.col("episodes.tv_episode_id")),
+          "episode_count",
+        ],
+      ],
+      include: [
+        {
+          model: tvEpisode,
+          as: "episodes",
+          attributes: [],
+        },
+      ],
+      group: ["tvSeason.tv_season_id"],
       order: [["season_number", "ASC"]],
-      distinct: true,
     });
 
-    result.number_of_seasons = totalSeasons.count;
-    result.seasons = totalSeasons.rows;
+    result.number_of_seasons = totalSeasons.length;
+    result.seasons = totalSeasons;
 
     // remove attributes not use in credits (tv seasons)
     const season = result.tvSeasons[0]; //tvSeason at 0 index cuz only one season we get (last air tv season)
@@ -254,7 +274,6 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
         name: k.Person.name,
       }));
     }
-
 
     // remove tvSeason, cuz we don't need it
     delete result.tvSeasons;

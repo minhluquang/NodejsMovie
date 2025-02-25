@@ -9,6 +9,7 @@ const {
   getAllTVSeriesSeasonEpisodeVideosServices,
 } = require("../services/tvSeries.services");
 const { getDetailSeasonServices } = require("../services/tvSeason.services");
+const { getDetailEpisodeServices } = require("../services/tvEpisode.services");
 const { body, param, validationResult } = require("express-validator");
 
 // Get movie trending (today/this week)
@@ -110,6 +111,16 @@ const getDetailSeason = async (req, res) => {
   }
 };
 
+const getDetailEpisode = async (req, res) => {
+  const { id, season_number, episode } = req.params;
+  try {
+    const result = await getDetailEpisodeServices(id, season_number, episode);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getPopularTVSeries,
   getDetailTVSeries,
@@ -120,4 +131,5 @@ module.exports = {
   getAllTVSeriesSeasonVideos,
   getAllTVSeriesSeasonEpisodeVideos,
   getDetailSeason,
+  getDetailEpisode,
 };
