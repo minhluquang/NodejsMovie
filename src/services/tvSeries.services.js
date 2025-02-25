@@ -234,10 +234,15 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
     };
 
     // Count seasons
-    const totalSeasons = await tvSeason.count({
+    const totalSeasons = await tvSeason.findAndCountAll({
       where: { tv_series_id },
+      attributes: { exclude: ["createdAt", "updatedAt", "tv_season_id"] },
+      order: [["season_number", "ASC"]],
+      distinct: true,
     });
-    result.number_of_seasons = totalSeasons;
+
+    result.number_of_seasons = totalSeasons.count;
+    result.seasons = totalSeasons.rows;
 
     // remove attributes not use in credits (tv seasons)
     const season = result.tvSeasons[0]; //tvSeason at 0 index cuz only one season we get (last air tv season)
@@ -249,6 +254,7 @@ const getDetailTVSeriesServices = async (tv_series_id) => {
         name: k.Person.name,
       }));
     }
+
 
     // remove tvSeason, cuz we don't need it
     delete result.tvSeasons;
@@ -264,6 +270,11 @@ const getAllTVSeriesImagesServices = async (tv_series_id) => {
   try {
     const tvSeriesImages = await TVSeriesImage.findAll({
       where: { tv_series_id, season: null, episode: null },
+      include: {
+        model: Account,
+        as: "author",
+        attributes: ["username"],
+      },
     });
 
     if (!tvSeriesImages || tvSeriesImages.length === 0) {
@@ -298,6 +309,7 @@ const getAllTVSeriesImagesServices = async (tv_series_id) => {
         file_path,
         vote_average,
         vote_count,
+        author: image.author?.username || null,
       });
       return acc;
     }, {});
@@ -319,6 +331,11 @@ const getAllTVSeriesSeasonImagesServices = async (
   try {
     const tvSeriesSeasonImages = await TVSeriesImage.findAll({
       where: { tv_series_id, season: season_number, episode: null },
+      include: {
+        model: Account,
+        as: "author",
+        attributes: ["username"],
+      },
     });
 
     if (!tvSeriesSeasonImages || tvSeriesSeasonImages.length === 0) {
@@ -353,6 +370,7 @@ const getAllTVSeriesSeasonImagesServices = async (
         file_path,
         vote_average,
         vote_count,
+        author: image.author?.username || null,
       });
       return acc;
     }, {});
@@ -375,6 +393,11 @@ const getAllTVSeriesSeasonEpisodeImagesServices = async (
   try {
     const tvSeriesSeasonEpisodeImages = await TVSeriesImage.findAll({
       where: { tv_series_id, season: season_number, episode: episode_number },
+      include: {
+        model: Account,
+        as: "author",
+        attributes: ["username"],
+      },
     });
 
     if (
@@ -412,6 +435,7 @@ const getAllTVSeriesSeasonEpisodeImagesServices = async (
         file_path,
         vote_average,
         vote_count,
+        author: image.author?.username || null,
       });
       return acc;
     }, {});

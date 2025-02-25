@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       TVSeriesImage.belongsTo(models.Account, {
         foreignKey: "account_id",
+        as: "author",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });

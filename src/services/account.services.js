@@ -339,6 +339,8 @@ const deleteAccountServices = async (account_id) => {
       { where: { account_id }, transaction }
     );
 
+    await transaction.commit();
+
     if (updateAccount[0] === 0) {
       return {
         success: true,

@@ -22,7 +22,7 @@ accountRouter.get("/", authenticate, authorize(["admin"]), getAllAccounts);
 accountRouter.get("/details", getAccount);
 accountRouter.post("/register", createNewAccount);
 accountRouter.put("/", updateAccount);
-accountRouter.delete("/:account_id", deleteAccount);
+accountRouter.put("/:account_id", deleteAccount);
 accountRouter.get("/verify-OTP-email-address", verifyOTPEmailAddress);
 accountRouter.post("/login", login);
 accountRouter.put("/verify-email", verifyEmailAddress);
