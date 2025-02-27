@@ -20,6 +20,7 @@ const {
   MovieImage,
   MovieVideo,
 } = require("../models");
+const _ = require("lodash");
 
 const getTrendingMoviesServices = async (type) => {
   try {
@@ -374,10 +375,102 @@ const getAllMovieVideosServices = async (movie_id) => {
   }
 };
 
+// get credits
+const getAllMovieCreditsServices = async (movie_id) => {
+  try {
+    // First, get your data from the database as you currently are
+    let movieCredits = await Movie.findAll({
+      where: { movie_id },
+      attributes: [],
+      include: {
+        model: MoviePeople,
+        as: "credits",
+        attributes: [["character_role", "character"], "department", "job"],
+        include: {
+          model: People,
+          attributes: [
+            "name",
+            "person_id",
+            "popularity",
+            "known_for_department",
+          ],
+        },
+      },
+    });
+
+    if (!movieCredits || movieCredits.length === 0) {
+      return {
+        success: true,
+        code: 200,
+        data: { msg: "No credit found." },
+      };
+    }
+
+    let cast = [];
+    let crew = [];
+
+    // Process all credits from all movies
+    movieCredits.forEach((movie) => {
+      movie = movie.get({ plain: true });
+
+      movie.credits.forEach((credit) => {
+        // Add to appropriate array based on known_for_department
+        if (credit.character) {
+          let person = {
+            character: credit.character,
+            name: credit.Person.name,
+            person_id: credit.Person.person_id,
+            popularity: credit.Person.popularity,
+            known_for_department: credit.Person.known_for_department,
+          };
+          cast.push(person);
+        } else {
+          let person = {
+            name: credit.Person.name,
+            person_id: credit.Person.person_id,
+            popularity: credit.Person.popularity,
+            known_for_department: credit.Person.known_for_department,
+            department: credit.department,
+            job: credit.job,
+          };
+          crew.push(person);
+        }
+      });
+    });
+
+    cast = _.orderBy(
+      _.uniqWith(
+        cast,
+        (a, b) => a.person_id === b.person_id && a.character === b.character
+      ),
+      ["popularity"],
+      ["desc"]
+    );
+
+    crew = _.orderBy(
+      _.uniqWith(
+        crew,
+        (a, b) => a.person_id === b.person_id && a.job === b.job
+      ),
+      ["popularity"],
+      ["desc"]
+    );
+
+    return {
+      success: true,
+      code: 200,
+      data: { cast, crew },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getTrendingMoviesServices,
   getUpcomingMoviesServices,
   getDetailMovieServices,
   getAllMovieImagesServices,
   getAllMovieVideosServices,
+  getAllMovieCreditsServices,
 };

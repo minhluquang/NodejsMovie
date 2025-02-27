@@ -23,6 +23,7 @@ const {
   ProductionCompany,
   TVSeriesImage,
   TVSeriesVideo,
+  tvEpisodePeople,
 } = require("../models");
 const {
   getLastAirEpisode,
@@ -30,6 +31,7 @@ const {
   getNextAirSeason,
   getLastAirSeason,
 } = require("./tvSeason.services");
+const _ = require("lodash");
 
 const getPopularTVSeriesServices = async () => {
   try {
@@ -572,6 +574,145 @@ const getAllTVSeriesSeasonEpisodeVideosServices = async (
   }
 };
 
+// get credits of tv_series
+const getTVSeriresCreditsServices = async (tv_series_id) => {
+  try {
+    let tvSeriesCredits = await tvSeries.findAll({
+      where: { tv_series_id },
+      attributes: [],
+      include: {
+        model: tvSeason,
+        attributes: ["tv_season_id"],
+        include: [
+          {
+            model: tvSeasonPeople,
+            as: "credits",
+            separate: true,
+            attributes: { exclude: ["created_at", "updated_at"] },
+            include: {
+              model: People,
+              required: true,
+            },
+          },
+          {
+            model: tvEpisode,
+            as: "episodes",
+            attributes: ["tv_episode_id"],
+            include: {
+              model: tvEpisodePeople,
+              attributes: { exclude: ["created_at", "updated_at"] },
+              include: { model: People, required: true },
+            },
+          },
+        ],
+      },
+    });
+
+    if (!tvSeriesCredits || tvSeriesCredits.length === 0) {
+      return {
+        success: true,
+        code: 200,
+        data: {
+          cast: [],
+          crew: [],
+        },
+      };
+    }
+
+    let cast = [];
+    let crew = [];
+
+    tvSeriesCredits.forEach((series) => {
+      series = series.get({ plain: true });
+
+      series.tvSeasons.forEach((season) => {
+        // For season
+        season.credits.forEach((credit) => {
+          if (credit.Person) {
+            if (credit.character_role) {
+              let personData = {
+                character: credit.character_role,
+                name: credit.Person.name,
+                person_id: credit.Person.person_id,
+                popularity: credit.Person.popularity,
+                known_for_department: credit.Person.known_for_department,
+              };
+              cast.push(personData);
+            } else {
+              let personData = {
+                name: credit.Person.name,
+                person_id: credit.Person.person_id,
+                popularity: credit.Person.popularity,
+                known_for_department: credit.Person.known_for_department,
+                department: credit.department,
+                job: credit.job,
+              };
+              crew.push(personData);
+            }
+          }
+        });
+
+        // For episode
+        season.episodes.forEach((eps) => {
+          eps.tvEpisodePeople.forEach((ep) => {
+            if (ep.Person) {
+              if (ep.character_role) {
+                let personData = {
+                  character: ep.character_role,
+                  name: ep.Person.name,
+                  person_id: ep.Person.person_id,
+                  popularity: ep.Person.popularity,
+                  known_for_department: ep.Person.known_for_department,
+                };
+                cast.push(personData);
+              } else {
+                let personData = {
+                  name: ep.Person.name,
+                  person_id: ep.Person.person_id,
+                  popularity: ep.Person.popularity,
+                  known_for_department: ep.Person.known_for_department,
+                  department: ep.department,
+                  job: ep.job,
+                };
+                crew.push(personData);
+              }
+            }
+          });
+        });
+      });
+    });
+
+    cast = _.orderBy(
+      _.uniqWith(
+        cast,
+        (a, b) => a.person_id === b.person_id && a.character === b.character
+      ),
+      ["popularity"],
+      ["desc"]
+    );
+
+    crew = _.orderBy(
+      _.uniqWith(
+        crew,
+        (a, b) => a.person_id === b.person_id && a.job === b.job
+      ),
+      ["popularity"],
+      ["desc"]
+    );
+
+    return {
+      success: true,
+      code: 200,
+      data: {
+        cast,
+        crew,
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getPopularTVSeriesServices,
   getDetailTVSeriesServices,
@@ -581,4 +722,5 @@ module.exports = {
   getAllTVSeriesVideosServices,
   getAllTVSeriesSeasonVideosServices,
   getAllTVSeriesSeasonEpisodeVideosServices,
+  getTVSeriresCreditsServices,
 };

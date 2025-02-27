@@ -31,7 +31,15 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
       },
       character_role: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      job: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      department: {
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       created_at: {

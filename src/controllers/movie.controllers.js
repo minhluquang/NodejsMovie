@@ -5,6 +5,7 @@ const {
   getDetailMovieServices,
   getAllMovieImagesServices,
   getAllMovieVideosServices,
+  getAllMovieCreditsServices,
 } = require("../services/movie.services");
 
 // Get movie trending (today/this week)
@@ -78,10 +79,22 @@ const getAllMovieVideos = async (req, res) => {
   }
 };
 
+// Get all credits
+const getAllMovieCredits = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await getAllMovieCreditsServices(id);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getTrendingMovies,
   getUpcomingMovies,
   getDetailMovie,
   getAllMovieImages,
   getAllMovieVideos,
+  getAllMovieCredits,
 };

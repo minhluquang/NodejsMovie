@@ -7,9 +7,16 @@ const {
   getAllTVSeriesVideosServices,
   getAllTVSeriesSeasonVideosServices,
   getAllTVSeriesSeasonEpisodeVideosServices,
+  getTVSeriresCreditsServices,
 } = require("../services/tvSeries.services");
-const { getDetailSeasonServices } = require("../services/tvSeason.services");
-const { getDetailEpisodeServices } = require("../services/tvEpisode.services");
+const {
+  getDetailSeasonServices,
+  getTVSeasonCreditsServices,
+} = require("../services/tvSeason.services");
+const {
+  getDetailEpisodeServices,
+  getTVEpisodeCreditsServices,
+} = require("../services/tvEpisode.services");
 const { body, param, validationResult } = require("express-validator");
 
 // Get movie trending (today/this week)
@@ -121,6 +128,43 @@ const getDetailEpisode = async (req, res) => {
   }
 };
 
+// Get all credits of tv_series
+const getTVSeriresCredits = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await getTVSeriresCreditsServices(id);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Get all credits of tv_episode
+const getTVEpisodeCredits = async (req, res) => {
+  try {
+    const { id, season_number, episode } = req.params;
+    const result = await getTVEpisodeCreditsServices(
+      id,
+      season_number,
+      episode
+    );
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Get all credits of tv_season
+const getTVSeasonCredits = async (req, res) => {
+  try {
+    const { id, season_number, episode } = req.params;
+    const result = await getTVSeasonCreditsServices(id, season_number, episode);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getPopularTVSeries,
   getDetailTVSeries,
@@ -132,4 +176,7 @@ module.exports = {
   getAllTVSeriesSeasonEpisodeVideos,
   getDetailSeason,
   getDetailEpisode,
+  getTVSeriresCredits,
+  getTVEpisodeCredits,
+  getTVSeasonCredits,
 };

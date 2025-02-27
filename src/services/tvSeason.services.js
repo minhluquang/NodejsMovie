@@ -2,10 +2,12 @@ const { Op } = require("sequelize");
 const {
   tvSeries,
   tvSeason,
+  tvSeasonPeople,
   tvEpisode,
   tvEpisodePeople,
   People,
 } = require("../models");
+const _ = require("lodash");
 
 const getLastAirEpisode = async (tv_series_id) => {
   try {
@@ -186,10 +188,91 @@ const getDetailSeasonServices = async (tv_series_id, season_number) => {
   }
 };
 
+// Get credits of tv_seasons
+const getTVSeasonCreditsServices = async (tv_series_id, season_number) => {
+  try {
+    let tvSeasonCredits = await tvSeries.findAll({
+      where: { tv_series_id },
+      attributes: [],
+      include: {
+        model: tvSeason,
+        attributes: { exclude: ["createdAt", "updatedAt"] },
+        where: { season_number },
+        include: {
+          model: tvSeasonPeople,
+          as: "credits",
+          attributes: { exclude: ["created_at", "updated_at"] },
+          include: {
+            model: People,
+            attributes: { exclude: ["createdAt", "updatedAt"] },
+          },
+        },
+      },
+    });
+
+    if (!tvSeasonCredits || tvSeasonCredits.length === 0) {
+      return {
+        success: true,
+        code: 200,
+        data: {
+          cast: [],
+          crew: [],
+        },
+      };
+    }
+
+    tvSeasonCredits = tvSeasonCredits.map((series) =>
+      series.get({ plain: true })
+    );
+
+    const series = tvSeasonCredits[0];
+    const season = series?.tvSeasons?.[0];
+    const creditData = season?.credits;
+
+    crew =
+      creditData
+        ?.filter((person) => person.character_role === null)
+        .map((person) => ({
+          job: person.job,
+          department: person.department,
+          name: person.Person.name,
+          person_id: person.person_id,
+          popularity: person.Person.popularity,
+          known_for_department: person.Person.known_for_department,
+        })) || [];
+
+    cast =
+      creditData
+        ?.filter((person) => person.character_role !== null)
+        .map((person) => ({
+          character: person.character_role,
+          name: person.Person.name,
+          person_id: person.person_id,
+          popularity: person.Person.popularity,
+          known_for_department: person.Person.known_for_department,
+        })) || [];
+
+    cast = _.orderBy(cast, ["popularity"], ["desc"]);
+    crew = _.orderBy(crew, ["popularity"], ["desc"]);
+
+    return {
+      success: true,
+      code: 200,
+      data: {
+        cast,
+        crew,
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getLastAirEpisode,
   getNextAirEpisode,
   getNextAirSeason,
   getLastAirSeason,
   getDetailSeasonServices,
+  getTVSeasonCreditsServices,
 };
