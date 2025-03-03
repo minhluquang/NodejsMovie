@@ -393,6 +393,7 @@ const getAllMovieCreditsServices = async (movie_id) => {
             "person_id",
             "popularity",
             "known_for_department",
+            "profile_path",
           ],
         },
       },
@@ -422,6 +423,7 @@ const getAllMovieCreditsServices = async (movie_id) => {
             person_id: credit.Person.person_id,
             popularity: credit.Person.popularity,
             known_for_department: credit.Person.known_for_department,
+            profile_path: credit.Person.profile_path,
           };
           cast.push(person);
         } else {
@@ -432,6 +434,7 @@ const getAllMovieCreditsServices = async (movie_id) => {
             known_for_department: credit.Person.known_for_department,
             department: credit.department,
             job: credit.job,
+            profile_path: credit.Person.profile_path,
           };
           crew.push(person);
         }

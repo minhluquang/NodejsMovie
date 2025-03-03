@@ -238,6 +238,7 @@ const getTVSeasonCreditsServices = async (tv_series_id, season_number) => {
           name: person.Person.name,
           person_id: person.person_id,
           popularity: person.Person.popularity,
+          profile_path: person.Person.profile_path,
           known_for_department: person.Person.known_for_department,
         })) || [];
 
@@ -249,6 +250,7 @@ const getTVSeasonCreditsServices = async (tv_series_id, season_number) => {
           name: person.Person.name,
           person_id: person.person_id,
           popularity: person.Person.popularity,
+          profile_path: person.Person.profile_path,
           known_for_department: person.Person.known_for_department,
         })) || [];
 

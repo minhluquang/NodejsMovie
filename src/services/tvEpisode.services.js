@@ -129,6 +129,7 @@ const getTVEpisodeCreditsServices = async (
           name: person.Person.name,
           person_id: person.person_id,
           popularity: person.Person.popularity,
+          profile_path: person.Person.profile_path,
           known_for_department: person.Person.known_for_department,
         })) || [];
 
@@ -141,22 +142,27 @@ const getTVEpisodeCreditsServices = async (
           name: person.Person.name,
           person_id: person.person_id,
           popularity: person.Person.popularity,
+          profile_path: person.Person.profile_path,
           known_for_department: person.Person.known_for_department,
         })) || [];
 
     cast =
-      castData.map((person) => ({
-        character: person.character_role,
-        name: person.Person.name,
-        person_id: person.person_id,
-        popularity: person.Person.popularity,
-        known_for_department: person.Person.known_for_department,
-      })) || [];
+      castData
+        ?.filter((person) => person.character_role !== null)
+        .map((person) => ({
+          character: person.character_role,
+          name: person.Person.name,
+          person_id: person.person_id,
+          popularity: person.Person.popularity,
+          profile_path: person.Person.profile_path,
+          known_for_department: person.Person.known_for_department,
+        })) || [];
 
     guest_stars = _.orderBy(guest_stars, ["popularity"], ["desc"]);
     cast = _.orderBy(cast, ["popularity"], ["desc"]);
     crew = _.orderBy(crew, ["popularity"], ["desc"]);
 
+    // console.log(castData.length);
     return {
       success: true,
       code: 200,

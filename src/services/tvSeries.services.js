@@ -635,6 +635,7 @@ const getTVSeriresCreditsServices = async (tv_series_id) => {
                 name: credit.Person.name,
                 person_id: credit.Person.person_id,
                 popularity: credit.Person.popularity,
+                profile_path: credit.Person.profile_path,
                 known_for_department: credit.Person.known_for_department,
               };
               cast.push(personData);
@@ -645,6 +646,7 @@ const getTVSeriresCreditsServices = async (tv_series_id) => {
                 popularity: credit.Person.popularity,
                 known_for_department: credit.Person.known_for_department,
                 department: credit.department,
+                profile_path: credit.Person.profile_path,
                 job: credit.job,
               };
               crew.push(personData);
@@ -662,6 +664,7 @@ const getTVSeriresCreditsServices = async (tv_series_id) => {
                   name: ep.Person.name,
                   person_id: ep.Person.person_id,
                   popularity: ep.Person.popularity,
+                  profile_path: ep.Person.profile_path,
                   known_for_department: ep.Person.known_for_department,
                 };
                 cast.push(personData);
@@ -672,6 +675,7 @@ const getTVSeriresCreditsServices = async (tv_series_id) => {
                   popularity: ep.Person.popularity,
                   known_for_department: ep.Person.known_for_department,
                   department: ep.department,
+                  profile_path: ep.Person.profile_path,
                   job: ep.job,
                 };
                 crew.push(personData);
