@@ -4,6 +4,14 @@ const {
   getAllMovieMultiMediaSerices,
   getAllTVSeriesMultiMediaServices,
   getVideoTrailersServices,
+  addWatchlistServices,
+  addFavoriteServices,
+  addRatingServices,
+  updateRatingServices,
+  deleteRatingServices,
+  getMediaInteractionStatusByAccountIdServices,
+  deleteFavoriteServices,
+  deleteWatchlistServices,
 } = require("../services/media.services");
 
 // Get movie trending (today/this week)
@@ -66,9 +74,143 @@ const getVideoTrailers = async (req, res) => {
   }
 };
 
+// Add watchlist
+const addWatchlist = async (req, res) => {
+  try {
+    const { id, type } = req.body;
+    const accountId = req.user.id;
+    const result = await addWatchlistServices(id, type, accountId);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Add favorite
+const addFavorite = async (req, res) => {
+  try {
+    const { id, type } = req.body;
+    const accountId = req.user.id;
+    const result = await addFavoriteServices(id, type, accountId);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Add rating
+const addRating = [
+  body("rating")
+    .isFloat({ min: 0, max: 5 })
+    .withMessage("Rating must be a number between 0 and 5."),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).send({
+        success: false,
+        data: errors.array(),
+      });
+    }
+
+    try {
+      const { id, type, rating } = req.body;
+      const accountId = req.user.id;
+      const result = await addRatingServices(id, type, rating, accountId);
+      res.status(result.code).send(result);
+    } catch (error) {
+      res.status(500).send({ success: false, data: { msg: error.message } });
+    }
+  },
+];
+
+// Update rating
+const updateRating = [
+  body("rating")
+    .isFloat({ min: 0, max: 5 })
+    .withMessage("Rating must be a number between 0 and 5."),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).send({
+        success: false,
+        data: errors.array(),
+      });
+    }
+
+    try {
+      const { id, type, rating } = req.body;
+      const accountId = req.user.id;
+      const result = await updateRatingServices(id, type, rating, accountId);
+      res.status(result.code).send(result);
+    } catch (error) {
+      res.status(500).send({ success: false, data: { msg: error.message } });
+    }
+  },
+];
+
+// Delete rating
+const deleteRating = async (req, res) => {
+  try {
+    const { id, type } = req.body;
+    const accountId = req.user.id;
+    const result = await deleteRatingServices(id, type, accountId);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Get rating by account_id and media_id
+const getMediaInteractionStatusByAccountId = async (req, res) => {
+  try {
+    const { id, type } = req.params;
+    const accountId = req.user.id;
+    const result = await getMediaInteractionStatusByAccountIdServices(
+      accountId,
+      id,
+      type
+    );
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Delete favorite
+const deleteFavorite = async (req, res) => {
+  try {
+    const { id, type } = req.body;
+    const accountId = req.user.id;
+    const result = await deleteFavoriteServices(id, type, accountId);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Dêlete watchlist
+const deleteWatchlist = async (req, res) => {
+  try {
+    const { id, type } = req.body;
+    const accountId = req.user.id;
+    const result = await deleteWatchlistServices(id, type, accountId);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getTrendingMedias,
   getAllMovieMultiMedia,
   getAllTVSeriesMultiMedia,
   getVideoTrailers,
+  addWatchlist,
+  addFavorite,
+  addRating,
+  updateRating,
+  deleteRating,
+  getMediaInteractionStatusByAccountId,
+  deleteFavorite,
+  deleteWatchlist,
 };

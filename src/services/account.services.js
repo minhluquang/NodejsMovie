@@ -314,6 +314,7 @@ const updateAccountServices = async (
 // Delete an account (active = 0)
 const deleteAccountServices = async (account_id) => {
   let transaction;
+
   try {
     transaction = await sequelize.transaction();
 
@@ -539,6 +540,7 @@ const loginServices = async (username, password) => {
     const payload = {
       username: account.username,
       role: account.Role.role,
+      id: account.account_id,
     };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
@@ -613,7 +615,6 @@ const verifyEmailAddressServices = async (token) => {
 
   try {
     transaction = await sequelize.transaction();
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const account = await Account.findOne({
       where: { email: decoded.email },

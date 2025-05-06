@@ -7,6 +7,13 @@ const {
   MovieVideo,
   TVSeriesImage,
   TVSeriesVideo,
+  WatchlistMovie,
+  WatchlistTVSeries,
+  FavoriteMovie,
+  FavoriteTVSeries,
+  RatingMovie,
+  RatingTVSeries,
+  sequelize,
 } = require("../models");
 const {
   getLastAirEpisode,
@@ -426,9 +433,510 @@ const getVideoTrailersServices = async () => {
   }
 };
 
+// Add watchlist services
+const addWatchlistServices = async (id, type, accountId) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    if (type === "movie") {
+      const movie = await Movie.findOne({ where: { movie_id: id } });
+      if (!movie) {
+        return { success: false, code: 404, data: { msg: "Movie not found" } };
+      }
+
+      const isExistMovieInWatchlist = await WatchlistMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+
+      if (isExistMovieInWatchlist) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "Movie already in watchlist" },
+        };
+      }
+
+      const newWatchlistMovie = new WatchlistMovie({
+        account_id: accountId,
+        movie_id: id,
+        added_at: new Date(),
+      });
+      await newWatchlistMovie.save({ transaction });
+    } else if (type === "tv") {
+      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
+      if (!tv) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "TV Series not found" },
+        };
+      }
+      const isExistTVInWatchlist = await WatchlistTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+
+      if (isExistTVInWatchlist) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "TV Series already in watchlist" },
+        };
+      }
+
+      const newWatchlistTVSeries = new WatchlistTVSeries({
+        account_id: accountId,
+        tv_series_id: id,
+        added_at: new Date(),
+      });
+      await newWatchlistTVSeries.save({ transaction });
+    } else {
+      return { success: false, code: 400, data: { msg: "Invalid type" } };
+    }
+    await transaction.commit();
+    return { success: true, code: 200, data: { msg: "Added to watchlist" } };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+// Delete watchlist services
+const deleteWatchlistServices = async (id, type, accountId) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    if (type === "movie") {
+      const isExistMovieInWatchlist = await WatchlistMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+      if (!isExistMovieInWatchlist) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "Movie not found in watchlist" },
+        };
+      }
+
+      await WatchlistMovie.destroy({
+        where: { account_id: accountId, movie_id: id },
+        transaction,
+      });
+    } else if (type === "tv") {
+      const isExistTVInWatchlist = await WatchlistTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+      if (!isExistTVInWatchlist) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "TV Series not found in watchlist" },
+        };
+      }
+
+      await WatchlistTVSeries.destroy({
+        where: { account_id: accountId, tv_series_id: id },
+        transaction,
+      });
+    } else {
+      return { success: false, code: 400, data: { msg: "Invalid type" } };
+    }
+    await transaction.commit();
+    return {
+      success: true,
+      code: 200,
+      data: { msg: "Removed from favorites" },
+    };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+// Add favorite services
+const addFavoriteServices = async (id, type, accountId) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    if (type === "movie") {
+      const movie = await Movie.findOne({ where: { movie_id: id } });
+      if (!movie) {
+        return { success: false, code: 404, data: { msg: "Movie not found" } };
+      }
+
+      const isExistMovieInFavorite = await FavoriteMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+
+      if (isExistMovieInFavorite) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "Movie already in favorite" },
+        };
+      }
+
+      const newFavoriteMovie = new FavoriteMovie({
+        account_id: accountId,
+        movie_id: id,
+        added_at: new Date(),
+      });
+      await newFavoriteMovie.save({ transaction });
+    } else if (type === "tv") {
+      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
+      if (!tv) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "TV Series not found" },
+        };
+      }
+      const isExistTVInFavorite = await FavoriteTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+
+      if (isExistTVInFavorite) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "TV Series already in favorite" },
+        };
+      }
+
+      const newFavoriteTVSeries = new FavoriteTVSeries({
+        account_id: accountId,
+        tv_series_id: id,
+        added_at: new Date(),
+      });
+      await newFavoriteTVSeries.save({ transaction });
+    } else {
+      return { success: false, code: 400, data: { msg: "Invalid type" } };
+    }
+    await transaction.commit();
+    return { success: true, code: 200, data: { msg: "Added to favorites" } };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+// Delete favorite services
+const deleteFavoriteServices = async (id, type, accountId) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    if (type === "movie") {
+      const isExistMovieInFavorite = await FavoriteMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+      if (!isExistMovieInFavorite) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "Movie not found in favorites" },
+        };
+      }
+
+      await FavoriteMovie.destroy({
+        where: { account_id: accountId, movie_id: id },
+        transaction,
+      });
+    } else if (type === "tv") {
+      const isExistTVInFavorite = await FavoriteTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+      if (!isExistTVInFavorite) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "TV Series not found in favorites" },
+        };
+      }
+
+      await FavoriteTVSeries.destroy({
+        where: { account_id: accountId, tv_series_id: id },
+        transaction,
+      });
+    } else {
+      return { success: false, code: 400, data: { msg: "Invalid type" } };
+    }
+    await transaction.commit();
+    return {
+      success: true,
+      code: 200,
+      data: { msg: "Removed from favorites" },
+    };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+// add rating services
+const addRatingServices = async (id, type, rating, accountId) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    if (type === "movie") {
+      const movie = await Movie.findOne({ where: { movie_id: id } });
+      if (!movie) {
+        return { success: false, code: 404, data: { msg: "Movie not found" } };
+      }
+
+      const isExistMovieInRating = await RatingMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+
+      if (isExistMovieInRating) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "Movie already rated" },
+        };
+      }
+
+      const newMovieRating = new RatingMovie({
+        account_id: accountId,
+        movie_id: id,
+        rating,
+        added_at: new Date(),
+      });
+      await newMovieRating.save({ transaction });
+    } else if (type === "tv") {
+      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
+      if (!tv) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "TV Series not found" },
+        };
+      }
+      const isExistTVInRating = await RatingTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+
+      if (isExistTVInRating) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "TV Series already rated" },
+        };
+      }
+
+      const newTVSeriesRating = new RatingTVSeries({
+        account_id: accountId,
+        tv_series_id: id,
+        rating,
+        added_at: new Date(),
+      });
+      await newTVSeriesRating.save({ transaction });
+    } else {
+      return { success: false, code: 400, data: { msg: "Invalid type" } };
+    }
+    await transaction.commit();
+    return { success: true, code: 200, data: { msg: "Added to ratings" } };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+// Update rating services
+const updateRatingServices = async (id, type, rating, accountId) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    if (type === "movie") {
+      const movie = await Movie.findOne({ where: { movie_id: id } });
+      if (!movie) {
+        return { success: false, code: 404, data: { msg: "Movie not found" } };
+      }
+
+      const isExistMovieInRating = await RatingMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+
+      if (!isExistMovieInRating) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "Movie not rated" },
+        };
+      }
+
+      isExistMovieInRating.rating = rating;
+      await isExistMovieInRating.save({ transaction });
+    } else if (type === "tv") {
+      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
+      if (!tv) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "TV Series not found" },
+        };
+      }
+      const isExistTVInRating = await RatingTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+
+      if (!isExistTVInRating) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "TV Series not rated" },
+        };
+      }
+
+      isExistTVInRating.rating = rating;
+      await isExistTVInRating.save({ transaction });
+    } else {
+      return { success: false, code: 400, data: { msg: "Invalid type" } };
+    }
+    await transaction.commit();
+    return { success: true, code: 200, data: { msg: "Updated rating" } };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+const deleteRatingServices = async (id, type, accountId) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    if (type === "movie") {
+      const movie = await Movie.findOne({ where: { movie_id: id } });
+      if (!movie) {
+        return { success: false, code: 404, data: { msg: "Movie not found" } };
+      }
+
+      const isExistMovieInRating = await RatingMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+
+      if (!isExistMovieInRating) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "Movie not rated" },
+        };
+      }
+
+      await isExistMovieInRating.destroy({ transaction });
+    } else if (type === "tv") {
+      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
+      if (!tv) {
+        return {
+          success: false,
+          code: 404,
+          data: { msg: "TV Series not found" },
+        };
+      }
+      const isExistTVInRating = await RatingTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+
+      if (!isExistTVInRating) {
+        return {
+          success: false,
+          code: 409,
+          data: { msg: "TV Series not rated" },
+        };
+      }
+
+      await isExistTVInRating.destroy({ transaction });
+    } else {
+      return { success: false, code: 400, data: { msg: "Invalid type" } };
+    }
+    await transaction.commit();
+    return { success: true, code: 200, data: { msg: "Deleted rating" } };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw error;
+  }
+};
+
+// Get rating by account id & media id & type
+const getMediaInteractionStatusByAccountIdServices = async (
+  accountId,
+  id,
+  type
+) => {
+  try {
+    let rating;
+    let favorite;
+    let watchlist;
+
+    if (type === "movie") {
+      rating = await RatingMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+      favorite = await FavoriteMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+      watchlist = await WatchlistMovie.findOne({
+        where: { account_id: accountId, movie_id: id },
+      });
+    } else if (type === "tv") {
+      rating = await RatingTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+      favorite = await FavoriteTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+      watchlist = await WatchlistTVSeries.findOne({
+        where: { account_id: accountId, tv_series_id: id },
+      });
+    } else {
+      return {
+        success: false,
+        code: 400,
+        data: { msg: "Invalid type" },
+      };
+    }
+
+    // Handle to response api
+    const data = {
+      account_id: accountId,
+      rating: rating ? rating.rating : 0,
+      favorite: favorite ? true : false,
+      watchlist: watchlist ? true : false,
+      rated_at: rating ? rating.rated_at : null,
+    };
+
+    if (type === "movie") {
+      data.movie_id = Number(id);
+    } else if (type === "tv") {
+      data.tv_series_id = Number(id);
+    }
+
+    return {
+      success: true,
+      code: 200,
+      data,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getTrendingMediasServices,
   getAllMovieMultiMediaSerices,
   getAllTVSeriesMultiMediaServices,
   getVideoTrailersServices,
+  addWatchlistServices,
+  addFavoriteServices,
+  addRatingServices,
+  updateRatingServices,
+  deleteRatingServices,
+  getMediaInteractionStatusByAccountIdServices,
+  deleteFavoriteServices,
+  deleteWatchlistServices,
 };
