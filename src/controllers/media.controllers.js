@@ -12,6 +12,7 @@ const {
   getMediaInteractionStatusByAccountIdServices,
   deleteFavoriteServices,
   deleteWatchlistServices,
+  getMediaByKeywordServices,
 } = require("../services/media.services");
 
 // Get movie trending (today/this week)
@@ -188,12 +189,23 @@ const deleteFavorite = async (req, res) => {
   }
 };
 
-// Dêlete watchlist
+// Delete watchlist
 const deleteWatchlist = async (req, res) => {
   try {
     const { id, type } = req.body;
     const accountId = req.user.id;
     const result = await deleteWatchlistServices(id, type, accountId);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
+// Get media by keyword
+const getMediaByKeyword = async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    const result = await getMediaByKeywordServices(keyword);
     res.status(result.code).send(result);
   } catch (error) {
     res.status(500).send({ success: false, data: { msg: error.message } });
@@ -213,4 +225,5 @@ module.exports = {
   getMediaInteractionStatusByAccountId,
   deleteFavorite,
   deleteWatchlist,
+  getMediaByKeyword,
 };

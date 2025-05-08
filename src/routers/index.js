@@ -4,6 +4,8 @@ const { movieRouter } = require("./movie.routers");
 const { tvSeriesRouter } = require("./tvSeries.routers");
 const { mediaRouter } = require("./media.routers");
 const { peopleRouter } = require("./people.routers");
+const { listRouter } = require("./list.routers");
+
 const rootRouter = express.Router();
 
 rootRouter.use("/account", accountRouter);
@@ -11,5 +13,6 @@ rootRouter.use("/movie", movieRouter);
 rootRouter.use("/tv", tvSeriesRouter);
 rootRouter.use("/media", mediaRouter);
 rootRouter.use("/people", peopleRouter);
+rootRouter.use("/list", listRouter);
 
 module.exports = { rootRouter };

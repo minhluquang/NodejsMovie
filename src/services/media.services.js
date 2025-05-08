@@ -926,6 +926,54 @@ const getMediaInteractionStatusByAccountIdServices = async (
   }
 };
 
+// get media by keyword services
+const getMediaByKeywordServices = async (keyword) => {
+  try {
+    const moviesList = await Movie.findAll({
+      where: {
+        title: {
+          [Op.like]: `%${keyword}%`,
+        },
+      },
+    });
+
+    const tvSeriesList = await tvSeries.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${keyword}%`,
+        },
+      },
+    });
+
+    const plainMovies = moviesList.map((m) => {
+      const movie = m.toJSON();
+      movie.popularity =
+        movie.popularity !== undefined ? Number(movie.popularity) : 0;
+      movie.mediaType = "movie";
+      return movie;
+    });
+
+    const plainTVSeries = tvSeriesList.map((tv) => {
+      const series = tv.toJSON();
+      series.popularity =
+        series.popularity !== undefined ? Number(series.popularity) : 0;
+      series.mediaType = "tv";
+      return series;
+    });
+
+    let data = [...plainMovies, ...plainTVSeries];
+    data = _.orderBy(data, ["popularity"], ["desc"]);
+
+    return {
+      success: true,
+      code: 200,
+      data: data.slice(0, 20),
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getTrendingMediasServices,
   getAllMovieMultiMediaSerices,
@@ -939,4 +987,5 @@ module.exports = {
   getMediaInteractionStatusByAccountIdServices,
   deleteFavoriteServices,
   deleteWatchlistServices,
+  getMediaByKeywordServices,
 };

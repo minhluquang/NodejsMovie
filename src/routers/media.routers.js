@@ -12,6 +12,7 @@ const {
   getMediaInteractionStatusByAccountId,
   deleteFavorite,
   deleteWatchlist,
+  getMediaByKeyword,
 } = require("../controllers/media.controllers");
 const { authenticate } = require("../middleware/auth/authenticate");
 
@@ -27,11 +28,12 @@ mediaRouter.post("/rating", authenticate, addRating);
 mediaRouter.put("/rating", authenticate, updateRating);
 mediaRouter.delete("/rating", authenticate, deleteRating);
 mediaRouter.get(
-  "/rating/:type/:id/",
+  "/interaction-status/:type/:id/",
   authenticate,
   getMediaInteractionStatusByAccountId
 );
 mediaRouter.delete("/favorite", authenticate, deleteFavorite);
 mediaRouter.delete("/watchlist", authenticate, deleteWatchlist);
+mediaRouter.get("/search", authenticate, getMediaByKeyword);
 
 module.exports = { mediaRouter };
