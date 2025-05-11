@@ -106,8 +106,14 @@ const getListByAccountIdAndListId = [
 
     try {
       const { id } = req.params;
+      const { sort_by, show_me } = req.query;
       const accountId = req.user.id;
-      const result = await getListByAccountIdAndListIdServices(accountId, id);
+      const result = await getListByAccountIdAndListIdServices(
+        accountId,
+        id,
+        sort_by,
+        show_me
+      );
       res.status(result.code).send(result);
     } catch (error) {
       res.status(500).send({ success: false, data: { msg: error.message } });

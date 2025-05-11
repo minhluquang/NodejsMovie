@@ -6,6 +6,8 @@ const {
   tvSeries,
   RatingMovie,
   RatingTVSeries,
+  Account,
+  AccountDetail,
   sequelize,
 } = require("../models");
 
@@ -13,7 +15,13 @@ const getListByAccountIdServices = async (account_id) => {
   try {
     const lists = await List.findAll({
       where: { account_id },
-      order: [["created_at", "DESC"]],
+      order: [["updated_at", "DESC"]],
+      include: [
+        {
+          model: MediaList,
+          as: "media_lists",
+        },
+      ],
     });
 
     return { success: true, code: 200, data: lists };
@@ -144,7 +152,12 @@ const sortMediaLists = (mediaLists, sort_by = "originalAcs") => {
   }
 };
 
-const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
+const getListByAccountIdAndListIdServices = async (
+  account_id,
+  list_id,
+  sort_by,
+  show_me
+) => {
   try {
     const rawList = await List.findOne({
       where: { account_id, list_id },
@@ -161,6 +174,10 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
                 "backdrop_path",
                 "release_date",
                 "movie_id",
+                "vote_average",
+                "runtime",
+                "revenue",
+                "poster_path",
               ],
               include: [
                 {
@@ -177,6 +194,8 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
                 "backdrop_path",
                 "first_air_date",
                 "tv_series_id",
+                "vote_average",
+                "poster_path",
               ],
               include: [
                 {
@@ -184,6 +203,16 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
                   attributes: ["rating"],
                 },
               ],
+            },
+          ],
+        },
+        {
+          model: Account,
+          include: [
+            {
+              model: AccountDetail,
+              as: "account_detail",
+              attributes: ["profile_picture"],
             },
           ],
         },
@@ -195,8 +224,20 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
     }
 
     const list = rawList.toJSON();
+
+    list.username = list.Account?.username;
+    list.profile_picture = list.Account?.account_detail?.profile_picture;
+    list.Account = undefined;
+
+    let rating_average = 0;
+    let totalRuntime = 0;
+    let totalRevenue = 0;
+
     list.media_lists = list.media_lists.map((media) => {
       if (media.type === "movie") {
+        rating_average += media.Movie?.vote_average || 0;
+        totalRuntime += media.Movie?.runtime || 0;
+        totalRevenue += media.Movie?.revenue || 0;
         return {
           ...media,
           title: media.Movie?.title,
@@ -204,11 +245,16 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
           backdrop_path: media.Movie?.backdrop_path,
           release_date: media.Movie?.release_date,
           rating: media.Movie?.RatingMovies?.[0]?.rating || 0,
+          vote_average: media.Movie?.vote_average,
+          runtime: media.Movie?.runtime,
+          revenue: media.Movie?.revenue,
+          poster_path: media.Movie?.poster_path,
           RatingMovie: undefined,
           Movie: undefined,
           tvSery: undefined,
         };
       } else if (media.type === "tv") {
+        rating_average += media.tvSery?.vote_average || 0;
         return {
           ...media,
           name: media.tvSery?.name,
@@ -216,6 +262,8 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
           backdrop_path: media.tvSery?.backdrop_path,
           release_date: media.tvSery?.first_air_date,
           rating: media.tvSery?.RatingTVSeries?.[0]?.rating || 0,
+          vote_average: media.tvSery?.vote_average,
+          poster_path: media.tvSery?.poster_path,
           RatingTVSeries: undefined,
           Movie: undefined,
           tvSery: undefined,
@@ -223,7 +271,24 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
       }
     });
 
-    list.media_lists = sortMediaLists(list.media_lists, list.sort_by);
+    if (sort_by) {
+      list.media_lists = sortMediaLists(list.media_lists, sort_by);
+    } else {
+      list.media_lists = sortMediaLists(list.media_lists, list.sort_by);
+    }
+
+    list.rating_average = rating_average / list.media_lists.length;
+    list.total_runtime = totalRuntime;
+    list.total_revenue = totalRevenue;
+    list.items_count = list.media_lists.length;
+
+    if (show_me === "seen") {
+      list.media_lists = list.media_lists.filter((media) => media.rating > 0);
+      console.log("SEEN");
+    } else if (show_me === "unseen") {
+      list.media_lists = list.media_lists.filter((media) => media.rating === 0);
+      console.log("UNSEEN");
+    }
 
     return {
       success: true,
