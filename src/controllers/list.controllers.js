@@ -4,7 +4,6 @@ const {
   createNewListServices,
   updateNewListServices,
   getListByAccountIdAndListIdServices,
-  addMediaToListServices,
 } = require("../services/list.services");
 
 const getListByAccountId = async (req, res) => {
@@ -65,7 +64,14 @@ const updateNewList = [
 
     try {
       const { id } = req.params;
-      const { name, description, is_public, is_comment, sort_by } = req.body;
+      const {
+        name,
+        description,
+        is_public,
+        is_comment,
+        sort_by,
+        backdrop_path,
+      } = req.body;
       const accountId = req.user.id;
       const result = await updateNewListServices(
         id,
@@ -74,7 +80,8 @@ const updateNewList = [
         description,
         is_public,
         is_comment,
-        sort_by
+        sort_by,
+        backdrop_path
       );
       res.status(result.code).send(result);
     } catch (error) {
@@ -108,30 +115,9 @@ const getListByAccountIdAndListId = [
   },
 ];
 
-// add media into list
-const addMediaIntoList = async (req, res) => {
-  try {
-    const list_id = req.params.id;
-    const { media_id, media_type, description } = req.body;
-    console.log(media_id, media_type, description)
-    const accountId = req.user.id;
-    const result = await addMediaToListServices(
-      list_id,
-      media_id,
-      media_type,
-      accountId,
-      description
-    );
-    res.status(result.code).send(result);
-  } catch (error) {
-    res.status(500).send({ success: false, data: { msg: error.message } });
-  }
-};
-
 module.exports = {
   getListByAccountId,
   createNewList,
   updateNewList,
   getListByAccountIdAndListId,
-  addMediaIntoList,
 };

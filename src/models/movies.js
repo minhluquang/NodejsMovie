@@ -56,6 +56,16 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      Movie.hasMany(models.MovieVideo, {
+        foreignKey: "movie_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      Movie.hasMany(models.RatingMovie, {
+        foreignKey: "movie_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   Movie.init(

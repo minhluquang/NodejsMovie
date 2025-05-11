@@ -1,5 +1,13 @@
-const { name } = require("ejs");
-const { List, MediaList, Movie, tvSeries, sequelize } = require("../models");
+const { first, includes } = require("lodash");
+const {
+  List,
+  MediaList,
+  Movie,
+  tvSeries,
+  RatingMovie,
+  RatingTVSeries,
+  sequelize,
+} = require("../models");
 
 const getListByAccountIdServices = async (account_id) => {
   try {
@@ -59,7 +67,8 @@ const updateNewListServices = async (
   description,
   is_public,
   is_comment,
-  sort_by
+  sort_by,
+  backdrop_path
 ) => {
   let transaction;
   try {
@@ -71,6 +80,7 @@ const updateNewListServices = async (
         is_public,
         is_comment,
         sort_by,
+        backdrop_path,
         updated_at: new Date(),
       },
       { where: { list_id: id, account_id } },
@@ -85,18 +95,11 @@ const updateNewListServices = async (
       };
     }
 
-    const data = {
-      list_id: Number(id),
-      account_id,
-      name,
-      description,
-      is_public: is_public ? 1 : 0,
-      is_comment: is_comment ? 1 : 0,
-      sort_by,
-    };
-
+    const data = await List.findOne({
+      where: { list_id: id, account_id },
+      transaction,
+    });
     await transaction.commit();
-
     return { success: true, code: 200, data };
   } catch (error) {
     await transaction.rollback();
@@ -105,6 +108,42 @@ const updateNewListServices = async (
 };
 
 // Get list by account_id and list_id
+const sortMediaLists = (mediaLists, sort_by = "originalAcs") => {
+  switch (sort_by) {
+    case "originalAcs":
+      return mediaLists.sort(
+        (a, b) => new Date(a.added_at) - new Date(b.added_at)
+      );
+    case "originalDes":
+      return mediaLists.sort(
+        (a, b) => new Date(b.added_at) - new Date(a.added_at)
+      );
+    case "ratingAcs":
+      return mediaLists.sort((a, b) => a.rating - b.rating);
+    case "ratingDes":
+      return mediaLists.sort((a, b) => b.rating - a.rating);
+    case "releaseDateAsc":
+      return mediaLists.sort(
+        (a, b) => new Date(a.release_date) - new Date(b.release_date)
+      );
+    case "releaseDateDes":
+      return mediaLists.sort(
+        (a, b) => new Date(b.release_date) - new Date(a.release_date)
+      );
+    case "titleAsc":
+      return mediaLists.sort((a, b) =>
+        (a.title || a.name).localeCompare(b.title || b.name)
+      );
+    case "titleDes":
+      return mediaLists.sort((a, b) =>
+        (b.title || b.name).localeCompare(a.title || a.name)
+      );
+
+    default:
+      return mediaLists;
+  }
+};
+
 const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
   try {
     const rawList = await List.findOne({
@@ -114,8 +153,38 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
           model: MediaList,
           as: "media_lists",
           include: [
-            { model: Movie, attributes: ["original_title", "title"] },
-            { model: tvSeries, attributes: ["name", "original_name"] },
+            {
+              model: Movie,
+              attributes: [
+                "original_title",
+                "title",
+                "backdrop_path",
+                "release_date",
+                "movie_id",
+              ],
+              include: [
+                {
+                  model: RatingMovie,
+                  attributes: ["rating"],
+                },
+              ],
+            },
+            {
+              model: tvSeries,
+              attributes: [
+                "name",
+                "original_name",
+                "backdrop_path",
+                "first_air_date",
+                "tv_series_id",
+              ],
+              include: [
+                {
+                  model: RatingTVSeries,
+                  attributes: ["rating"],
+                },
+              ],
+            },
           ],
         },
       ],
@@ -132,6 +201,10 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
           ...media,
           title: media.Movie?.title,
           original_title: media.Movie?.original_title,
+          backdrop_path: media.Movie?.backdrop_path,
+          release_date: media.Movie?.release_date,
+          rating: media.Movie?.RatingMovies?.[0]?.rating || 0,
+          RatingMovie: undefined,
           Movie: undefined,
           tvSery: undefined,
         };
@@ -140,109 +213,27 @@ const getListByAccountIdAndListIdServices = async (account_id, list_id) => {
           ...media,
           name: media.tvSery?.name,
           original_name: media.tvSery?.original_name,
+          backdrop_path: media.tvSery?.backdrop_path,
+          release_date: media.tvSery?.first_air_date,
+          rating: media.tvSery?.RatingTVSeries?.[0]?.rating || 0,
+          RatingTVSeries: undefined,
           Movie: undefined,
           tvSery: undefined,
         };
       }
     });
 
-    return { success: true, code: 200, data: list };
+    list.media_lists = sortMediaLists(list.media_lists, list.sort_by);
+
+    return {
+      success: true,
+      code: 200,
+      data: list,
+    };
   } catch (error) {
     throw new Error(
       "Error fetching list by account ID and list ID: " + error.message
     );
-  }
-};
-
-// const add media into list
-const addMediaToListServices = async (
-  list_id,
-  media_id,
-  media_type,
-  account_id,
-  description
-) => {
-  let transaction;
-  try {
-    transaction = await sequelize.transaction();
-
-    if (media_type !== "movie" && media_type !== "tv") {
-      return { success: false, code: 400, data: { msg: "Invalid media type" } };
-    }
-
-    if (media_type === "movie") {
-      const media = await List.findAll({
-        include: [
-          {
-            model: MediaList,
-            as: "media_lists",
-            where: { type: media_type, movie_id: media_id },
-          },
-        ],
-        where: { account_id, list_id },
-      });
-
-      if (media.length > 0) {
-        return {
-          success: false,
-          code: 400,
-          data: { msg: "Media already exists in the list" },
-        };
-      }
-    } else if (media_type === "tv") {
-      const media = await List.findAll({
-        include: [
-          {
-            model: MediaList,
-            as: "media_lists",
-            where: { type: media_type, tv_series_id: media_id },
-          },
-        ],
-        where: { account_id, list_id },
-      });
-
-      if (media.length > 0) {
-        return {
-          success: false,
-          code: 400,
-          data: { msg: "Media already exists in the list" },
-        };
-      }
-    }
-
-    let newMedia;
-    if (media_type === "movie") {
-      newMedia = await MediaList.create(
-        {
-          list_id: Number(list_id),
-          movie_id: media_id,
-          tv_series_id: null,
-          type: media_type,
-          description,
-          added_at: new Date(),
-        },
-        { transaction }
-      );
-    } else if (media_type === "tv") {
-      newMedia = await MediaList.create(
-        {
-          list_id: Number(list_id),
-          movie_id: null,
-          tv_series_id: media_id,
-          type: media_type,
-          description,
-          added_at: new Date(),
-        },
-        { transaction }
-      );
-    }
-
-    transaction.commit();
-
-    return { success: true, code: 201, data: newMedia };
-  } catch (error) {
-    await transaction.rollback();
-    throw new Error("Error adding media to list: " + error.message);
   }
 };
 
@@ -251,5 +242,4 @@ module.exports = {
   createNewListServices,
   updateNewListServices,
   getListByAccountIdAndListIdServices,
-  addMediaToListServices,
 };

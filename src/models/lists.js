@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
-      poster_path: {
+      backdrop_path: {
         type: DataTypes.STRING(100),
         allowNull: true,
       },
