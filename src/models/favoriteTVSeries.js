@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class FavortieTVSeries extends Model {
+  class FavoriteTVSeries extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,19 +9,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      FavortieTVSeries.belongsTo(models.tvSeries, {
+      FavoriteTVSeries.belongsTo(models.tvSeries, {
         foreignKey: "tv_series_id",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
-      FavortieTVSeries.belongsTo(models.Account, {
+      FavoriteTVSeries.belongsTo(models.Account, {
         foreignKey: "account_id",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
     }
   }
-  FavortieTVSeries.init(
+  FavoriteTVSeries.init(
     {
       account_id: {
         type: DataTypes.INTEGER,
@@ -41,10 +41,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "FavortieTVSeries",
+      modelName: "FavoriteTVSeries",
       tableName: "favorite_tv_series",
       timestamps: false,
     }
   );
-  return FavortieTVSeries;
+  return FavoriteTVSeries;
 };

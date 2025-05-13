@@ -71,6 +71,11 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      tvSeries.hasMany(models.FavoriteTVSeries, {
+        foreignKey: "tv_series_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   tvSeries.init(

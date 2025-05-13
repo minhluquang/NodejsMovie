@@ -4,6 +4,7 @@ const {
   createNewListServices,
   updateNewListServices,
   getListByAccountIdAndListIdServices,
+  deleteListByAccountIdAndListIdServices,
 } = require("../services/list.services");
 
 const getListByAccountId = async (req, res) => {
@@ -107,7 +108,8 @@ const getListByAccountIdAndListId = [
     try {
       const { id } = req.params;
       const { sort_by, show_me } = req.query;
-      const accountId = req.user.id;
+      const accountId = req.user?.id || null;
+
       const result = await getListByAccountIdAndListIdServices(
         accountId,
         id,
@@ -121,9 +123,22 @@ const getListByAccountIdAndListId = [
   },
 ];
 
+// delete list
+const deleteListByAccountIdAndListId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const accountId = req.user.id;
+    const result = await deleteListByAccountIdAndListIdServices(accountId, id);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getListByAccountId,
   createNewList,
   updateNewList,
   getListByAccountIdAndListId,
+  deleteListByAccountIdAndListId,
 };

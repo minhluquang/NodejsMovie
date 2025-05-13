@@ -220,8 +220,46 @@ const removeMediaFromListServices = async (
   }
 };
 
+const removeAllMediaFromListServices = async (list_id, account_id) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    const list = await List.findOne({
+      where: { list_id, account_id },
+    });
+
+    if (!list) {
+      return {
+        success: false,
+        code: 404,
+        data: { msg: "List not found" },
+      };
+    }
+
+    await MediaList.destroy({
+      where: { list_id },
+      transaction,
+    });
+
+    await transaction.commit();
+
+    return {
+      success: true,
+      code: 200,
+      data: { msg: "All media removed successfully" },
+    };
+  } catch (error) {
+    if (transaction) {
+      await transaction.rollback();
+    }
+    throw new Error("Error removing all media from list: " + error.message);
+  }
+};
+
 module.exports = {
   addMediaIntoListServices,
   updateMediaListServices,
   removeMediaFromListServices,
+  removeAllMediaFromListServices,
 };

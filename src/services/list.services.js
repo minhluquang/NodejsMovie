@@ -1,4 +1,3 @@
-const { first, includes } = require("lodash");
 const {
   List,
   MediaList,
@@ -160,7 +159,7 @@ const getListByAccountIdAndListIdServices = async (
 ) => {
   try {
     const rawList = await List.findOne({
-      where: { account_id, list_id },
+      where: { list_id },
       include: [
         {
           model: MediaList,
@@ -225,6 +224,14 @@ const getListByAccountIdAndListIdServices = async (
 
     const list = rawList.toJSON();
 
+    if (list.is_public === 0 && account_id !== list.account_id) {
+      return {
+        success: false,
+        code: 403,
+        data: { msg: "This list is private" },
+      };
+    }
+
     list.username = list.Account?.username;
     list.profile_picture = list.Account?.account_detail?.profile_picture;
     list.Account = undefined;
@@ -284,10 +291,8 @@ const getListByAccountIdAndListIdServices = async (
 
     if (show_me === "seen") {
       list.media_lists = list.media_lists.filter((media) => media.rating > 0);
-      console.log("SEEN");
     } else if (show_me === "unseen") {
       list.media_lists = list.media_lists.filter((media) => media.rating === 0);
-      console.log("UNSEEN");
     }
 
     return {
@@ -302,9 +307,38 @@ const getListByAccountIdAndListIdServices = async (
   }
 };
 
+// Delete list
+const deleteListByAccountIdAndListIdServices = async (account_id, list_id) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+    const list = await List.findOne({
+      where: { list_id, account_id },
+    });
+
+    if (!list) {
+      return { success: false, code: 404, data: { msg: "List not found" } };
+    }
+
+    await MediaList.destroy({
+      where: { list_id },
+      transaction,
+    });
+    await list.destroy({ transaction });
+
+    await transaction.commit();
+
+    return { success: true, code: 200, data: { msg: "List deleted" } };
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    throw new Error("Error deleting list: " + error.message);
+  }
+};
+
 module.exports = {
   getListByAccountIdServices,
   createNewListServices,
   updateNewListServices,
   getListByAccountIdAndListIdServices,
+  deleteListByAccountIdAndListIdServices,
 };

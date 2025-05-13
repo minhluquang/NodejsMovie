@@ -675,193 +675,6 @@ const deleteFavoriteServices = async (id, type, accountId) => {
   }
 };
 
-// add rating services
-const addRatingServices = async (id, type, rating, accountId) => {
-  let transaction;
-  try {
-    transaction = await sequelize.transaction();
-
-    if (type === "movie") {
-      const movie = await Movie.findOne({ where: { movie_id: id } });
-      if (!movie) {
-        return { success: false, code: 404, data: { msg: "Movie not found" } };
-      }
-
-      const isExistMovieInRating = await RatingMovie.findOne({
-        where: { account_id: accountId, movie_id: id },
-      });
-
-      if (isExistMovieInRating) {
-        return {
-          success: false,
-          code: 409,
-          data: { msg: "Movie already rated" },
-        };
-      }
-
-      const newMovieRating = new RatingMovie({
-        account_id: accountId,
-        movie_id: id,
-        rating,
-        added_at: new Date(),
-      });
-      await newMovieRating.save({ transaction });
-    } else if (type === "tv") {
-      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
-      if (!tv) {
-        return {
-          success: false,
-          code: 404,
-          data: { msg: "TV Series not found" },
-        };
-      }
-      const isExistTVInRating = await RatingTVSeries.findOne({
-        where: { account_id: accountId, tv_series_id: id },
-      });
-
-      if (isExistTVInRating) {
-        return {
-          success: false,
-          code: 409,
-          data: { msg: "TV Series already rated" },
-        };
-      }
-
-      const newTVSeriesRating = new RatingTVSeries({
-        account_id: accountId,
-        tv_series_id: id,
-        rating,
-        added_at: new Date(),
-      });
-      await newTVSeriesRating.save({ transaction });
-    } else {
-      return { success: false, code: 400, data: { msg: "Invalid type" } };
-    }
-    await transaction.commit();
-    return { success: true, code: 200, data: { msg: "Added to ratings" } };
-  } catch (error) {
-    if (transaction) await transaction.rollback();
-    throw error;
-  }
-};
-
-// Update rating services
-const updateRatingServices = async (id, type, rating, accountId) => {
-  let transaction;
-  try {
-    transaction = await sequelize.transaction();
-
-    if (type === "movie") {
-      const movie = await Movie.findOne({ where: { movie_id: id } });
-      if (!movie) {
-        return { success: false, code: 404, data: { msg: "Movie not found" } };
-      }
-
-      const isExistMovieInRating = await RatingMovie.findOne({
-        where: { account_id: accountId, movie_id: id },
-      });
-
-      if (!isExistMovieInRating) {
-        return {
-          success: false,
-          code: 409,
-          data: { msg: "Movie not rated" },
-        };
-      }
-
-      isExistMovieInRating.rating = rating;
-      await isExistMovieInRating.save({ transaction });
-    } else if (type === "tv") {
-      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
-      if (!tv) {
-        return {
-          success: false,
-          code: 404,
-          data: { msg: "TV Series not found" },
-        };
-      }
-      const isExistTVInRating = await RatingTVSeries.findOne({
-        where: { account_id: accountId, tv_series_id: id },
-      });
-
-      if (!isExistTVInRating) {
-        return {
-          success: false,
-          code: 409,
-          data: { msg: "TV Series not rated" },
-        };
-      }
-
-      isExistTVInRating.rating = rating;
-      await isExistTVInRating.save({ transaction });
-    } else {
-      return { success: false, code: 400, data: { msg: "Invalid type" } };
-    }
-    await transaction.commit();
-    return { success: true, code: 200, data: { msg: "Updated rating" } };
-  } catch (error) {
-    if (transaction) await transaction.rollback();
-    throw error;
-  }
-};
-
-const deleteRatingServices = async (id, type, accountId) => {
-  let transaction;
-  try {
-    transaction = await sequelize.transaction();
-
-    if (type === "movie") {
-      const movie = await Movie.findOne({ where: { movie_id: id } });
-      if (!movie) {
-        return { success: false, code: 404, data: { msg: "Movie not found" } };
-      }
-
-      const isExistMovieInRating = await RatingMovie.findOne({
-        where: { account_id: accountId, movie_id: id },
-      });
-
-      if (!isExistMovieInRating) {
-        return {
-          success: false,
-          code: 409,
-          data: { msg: "Movie not rated" },
-        };
-      }
-
-      await isExistMovieInRating.destroy({ transaction });
-    } else if (type === "tv") {
-      const tv = await tvSeries.findOne({ where: { tv_series_id: id } });
-      if (!tv) {
-        return {
-          success: false,
-          code: 404,
-          data: { msg: "TV Series not found" },
-        };
-      }
-      const isExistTVInRating = await RatingTVSeries.findOne({
-        where: { account_id: accountId, tv_series_id: id },
-      });
-
-      if (!isExistTVInRating) {
-        return {
-          success: false,
-          code: 409,
-          data: { msg: "TV Series not rated" },
-        };
-      }
-
-      await isExistTVInRating.destroy({ transaction });
-    } else {
-      return { success: false, code: 400, data: { msg: "Invalid type" } };
-    }
-    await transaction.commit();
-    return { success: true, code: 200, data: { msg: "Deleted rating" } };
-  } catch (error) {
-    if (transaction) await transaction.rollback();
-    throw error;
-  }
-};
-
 // Get rating by account id & media id & type
 const getMediaInteractionStatusByAccountIdServices = async (
   accountId,
@@ -904,7 +717,7 @@ const getMediaInteractionStatusByAccountIdServices = async (
     // Handle to response api
     const data = {
       account_id: accountId,
-      rating: rating ? rating.rating : 0,
+      rating: rating ? rating.rating : -1,
       favorite: favorite ? true : false,
       watchlist: watchlist ? true : false,
       rated_at: rating ? rating.rated_at : null,
@@ -981,9 +794,6 @@ module.exports = {
   getVideoTrailersServices,
   addWatchlistServices,
   addFavoriteServices,
-  addRatingServices,
-  updateRatingServices,
-  deleteRatingServices,
   getMediaInteractionStatusByAccountIdServices,
   deleteFavoriteServices,
   deleteWatchlistServices,

@@ -6,9 +6,6 @@ const {
   getVideoTrailersServices,
   addWatchlistServices,
   addFavoriteServices,
-  addRatingServices,
-  updateRatingServices,
-  deleteRatingServices,
   getMediaInteractionStatusByAccountIdServices,
   deleteFavoriteServices,
   deleteWatchlistServices,
@@ -99,68 +96,6 @@ const addFavorite = async (req, res) => {
   }
 };
 
-// Add rating
-const addRating = [
-  body("rating")
-    .isFloat({ min: 0, max: 5 })
-    .withMessage("Rating must be a number between 0 and 5."),
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).send({
-        success: false,
-        data: errors.array(),
-      });
-    }
-
-    try {
-      const { id, type, rating } = req.body;
-      const accountId = req.user.id;
-      const result = await addRatingServices(id, type, rating, accountId);
-      res.status(result.code).send(result);
-    } catch (error) {
-      res.status(500).send({ success: false, data: { msg: error.message } });
-    }
-  },
-];
-
-// Update rating
-const updateRating = [
-  body("rating")
-    .isFloat({ min: 0, max: 5 })
-    .withMessage("Rating must be a number between 0 and 5."),
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).send({
-        success: false,
-        data: errors.array(),
-      });
-    }
-
-    try {
-      const { id, type, rating } = req.body;
-      const accountId = req.user.id;
-      const result = await updateRatingServices(id, type, rating, accountId);
-      res.status(result.code).send(result);
-    } catch (error) {
-      res.status(500).send({ success: false, data: { msg: error.message } });
-    }
-  },
-];
-
-// Delete rating
-const deleteRating = async (req, res) => {
-  try {
-    const { id, type } = req.body;
-    const accountId = req.user.id;
-    const result = await deleteRatingServices(id, type, accountId);
-    res.status(result.code).send(result);
-  } catch (error) {
-    res.status(500).send({ success: false, data: { msg: error.message } });
-  }
-};
-
 // Get rating by account_id and media_id
 const getMediaInteractionStatusByAccountId = async (req, res) => {
   try {
@@ -219,9 +154,6 @@ module.exports = {
   getVideoTrailers,
   addWatchlist,
   addFavorite,
-  addRating,
-  updateRating,
-  deleteRating,
   getMediaInteractionStatusByAccountId,
   deleteFavorite,
   deleteWatchlist,
