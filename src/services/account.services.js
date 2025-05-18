@@ -615,6 +615,15 @@ const verifyEmailAddressServices = async (token) => {
 
   try {
     transaction = await sequelize.transaction();
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return {
+        success: false,
+        code: 401,
+        data: { msg: "Invalid or expired token" },
+      };
+    }
 
     const account = await Account.findOne({
       where: { email: decoded.email },

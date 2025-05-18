@@ -4,11 +4,9 @@ const {
   getAllMovieMultiMediaSerices,
   getAllTVSeriesMultiMediaServices,
   getVideoTrailersServices,
-  addWatchlistServices,
   addFavoriteServices,
   getMediaInteractionStatusByAccountIdServices,
   deleteFavoriteServices,
-  deleteWatchlistServices,
   getMediaByKeywordServices,
 } = require("../services/media.services");
 
@@ -72,18 +70,6 @@ const getVideoTrailers = async (req, res) => {
   }
 };
 
-// Add watchlist
-const addWatchlist = async (req, res) => {
-  try {
-    const { id, type } = req.body;
-    const accountId = req.user.id;
-    const result = await addWatchlistServices(id, type, accountId);
-    res.status(result.code).send(result);
-  } catch (error) {
-    res.status(500).send({ success: false, data: { msg: error.message } });
-  }
-};
-
 // Add favorite
 const addFavorite = async (req, res) => {
   try {
@@ -124,18 +110,6 @@ const deleteFavorite = async (req, res) => {
   }
 };
 
-// Delete watchlist
-const deleteWatchlist = async (req, res) => {
-  try {
-    const { id, type } = req.body;
-    const accountId = req.user.id;
-    const result = await deleteWatchlistServices(id, type, accountId);
-    res.status(result.code).send(result);
-  } catch (error) {
-    res.status(500).send({ success: false, data: { msg: error.message } });
-  }
-};
-
 // Get media by keyword
 const getMediaByKeyword = async (req, res) => {
   try {
@@ -152,10 +126,8 @@ module.exports = {
   getAllMovieMultiMedia,
   getAllTVSeriesMultiMedia,
   getVideoTrailers,
-  addWatchlist,
   addFavorite,
   getMediaInteractionStatusByAccountId,
   deleteFavorite,
-  deleteWatchlist,
   getMediaByKeyword,
 };
