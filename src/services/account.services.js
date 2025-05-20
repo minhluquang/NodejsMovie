@@ -846,6 +846,50 @@ const checkValidTokenChangePasswordServices = async (token) => {
   }
 };
 
+const verifyChangeEmailServices = async (accountId, email) => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+    const account = await Account.findOne({
+      where: { account_id: accountId },
+      include: { model: EmailConfirmation, as: "email_confirmation" },
+      transaction,
+    });
+
+    // Return if have no account
+    if (!account || account.length === 0) {
+      return {
+        success: true,
+        code: 200,
+        data: { msg: "No account found" },
+      };
+    }
+
+    // Update new email
+    account.email = email;
+    account.is_verified = 0;
+    account.updated_at = sequelize.literal("NOW()");
+    await account.save({ transaction });
+
+    // Store the token into email_confirmation table
+    account.email_confirmation.token_verify_email = null;
+    account.email_confirmation.email = email
+    account.email_confirmation.updated_at = sequelize.literal("NOW()");
+    await account.email_confirmation.save({ transaction });
+
+    await transaction.commit();
+
+    // Return if true username & password
+    return {
+      success: true,
+      code: 200,
+      data: {
+        msg: "Change email successful",
+      },
+    };
+  } catch (error) {}
+};
+
 module.exports = {
   getAllAccountsServices,
   getAccountServices,
@@ -859,4 +903,5 @@ module.exports = {
   resetPasswordServices,
   verifyChangePasswordServices,
   checkValidTokenChangePasswordServices,
+  verifyChangeEmailServices,
 };

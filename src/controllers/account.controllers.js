@@ -13,6 +13,7 @@ const {
   resetPasswordServices,
   verifyChangePasswordServices,
   checkValidTokenChangePasswordServices,
+  verifyChangeEmailServices,
 } = require("../services/account.services");
 
 // Get all accounts
@@ -327,6 +328,17 @@ const resendActivationEmail = [
   },
 ];
 
+const verifyChangeEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const accountId = req.user.id;
+    const result = await verifyChangeEmailServices(accountId, email);
+    res.status(result.code).send(result);
+  } catch (error) {
+    res.status(500).send({ success: false, data: { msg: error.message } });
+  }
+};
+
 module.exports = {
   getAllAccounts,
   getAccount,
@@ -340,4 +352,5 @@ module.exports = {
   verifyChangePassword,
   checkValidTokenChangePassword,
   resendActivationEmail,
+  verifyChangeEmail,
 };

@@ -4,9 +4,7 @@ const {
   getAllMovieMultiMedia,
   getAllTVSeriesMultiMedia,
   getVideoTrailers,
-  addFavorite,
   getMediaInteractionStatusByAccountId,
-  deleteFavorite,
   getMediaByKeyword,
 } = require("../controllers/media.controllers");
 const {
@@ -20,6 +18,11 @@ const {
   deleteWatchlist,
   addWatchlist,
 } = require("../controllers/watchlistMedia.controllers");
+const {
+  getFavoriteMediaByAccountId,
+  addFavorite,
+  deleteFavorite,
+} = require("../controllers/favoriteMedia.controllers");
 const { authenticate } = require("../middleware/auth/authenticate");
 
 const mediaRouter = express.Router();
@@ -44,5 +47,6 @@ mediaRouter.get("/search", authenticate, getMediaByKeyword);
 mediaRouter.get("/rating", authenticate, getRatingMediaByAccountId);
 mediaRouter.get("/watchlist", authenticate, getWatchlistMediaByAccountId);
 mediaRouter.delete("/watchlist", authenticate, deleteWatchlist);
+mediaRouter.get("/favorite", authenticate, getFavoriteMediaByAccountId);
 
 module.exports = { mediaRouter };

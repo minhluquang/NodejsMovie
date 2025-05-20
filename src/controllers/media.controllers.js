@@ -4,9 +4,7 @@ const {
   getAllMovieMultiMediaSerices,
   getAllTVSeriesMultiMediaServices,
   getVideoTrailersServices,
-  addFavoriteServices,
   getMediaInteractionStatusByAccountIdServices,
-  deleteFavoriteServices,
   getMediaByKeywordServices,
 } = require("../services/media.services");
 
@@ -70,18 +68,6 @@ const getVideoTrailers = async (req, res) => {
   }
 };
 
-// Add favorite
-const addFavorite = async (req, res) => {
-  try {
-    const { id, type } = req.body;
-    const accountId = req.user.id;
-    const result = await addFavoriteServices(id, type, accountId);
-    res.status(result.code).send(result);
-  } catch (error) {
-    res.status(500).send({ success: false, data: { msg: error.message } });
-  }
-};
-
 // Get rating by account_id and media_id
 const getMediaInteractionStatusByAccountId = async (req, res) => {
   try {
@@ -92,18 +78,6 @@ const getMediaInteractionStatusByAccountId = async (req, res) => {
       id,
       type
     );
-    res.status(result.code).send(result);
-  } catch (error) {
-    res.status(500).send({ success: false, data: { msg: error.message } });
-  }
-};
-
-// Delete favorite
-const deleteFavorite = async (req, res) => {
-  try {
-    const { id, type } = req.body;
-    const accountId = req.user.id;
-    const result = await deleteFavoriteServices(id, type, accountId);
     res.status(result.code).send(result);
   } catch (error) {
     res.status(500).send({ success: false, data: { msg: error.message } });
@@ -126,8 +100,6 @@ module.exports = {
   getAllMovieMultiMedia,
   getAllTVSeriesMultiMedia,
   getVideoTrailers,
-  addFavorite,
   getMediaInteractionStatusByAccountId,
-  deleteFavorite,
   getMediaByKeyword,
 };

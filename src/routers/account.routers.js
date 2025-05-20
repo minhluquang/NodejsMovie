@@ -12,6 +12,7 @@ const {
   verifyChangePassword,
   checkValidTokenChangePassword,
   resendActivationEmail,
+  verifyChangeEmail,
 } = require("../controllers/account.controllers");
 const { authenticate } = require("../middleware/auth/authenticate");
 const { authorize } = require("../middleware/auth/authorize");
@@ -32,6 +33,7 @@ accountRouter.post(
   checkValidTokenChangePassword
 );
 accountRouter.post("/resend-activation-email", resendActivationEmail);
+accountRouter.put("/change-email", authenticate, verifyChangeEmail);
 accountRouter.put("/:account_id", deleteAccount);
 
 module.exports = { accountRouter };
