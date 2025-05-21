@@ -330,9 +330,9 @@ const resendActivationEmail = [
 
 const verifyChangeEmail = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
     const accountId = req.user.id;
-    const result = await verifyChangeEmailServices(accountId, email);
+    const result = await verifyChangeEmailServices(accountId, email, password);
     res.status(result.code).send(result);
   } catch (error) {
     res.status(500).send({ success: false, data: { msg: error.message } });

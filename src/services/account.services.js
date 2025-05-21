@@ -846,7 +846,7 @@ const checkValidTokenChangePasswordServices = async (token) => {
   }
 };
 
-const verifyChangeEmailServices = async (accountId, email) => {
+const verifyChangeEmailServices = async (accountId, email, password) => {
   let transaction;
   try {
     transaction = await sequelize.transaction();
@@ -865,6 +865,37 @@ const verifyChangeEmailServices = async (accountId, email) => {
       };
     }
 
+    const isPasswordValid = bcrypt.compareSync(password, account.password);
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        code: 401,
+        data: { msg: "Invalid credentials" },
+      };
+    }
+
+    if (email === account.email) {
+      return {
+        success: false,
+        code: 400,
+        data: { msg: "Email is the same as the current one" },
+      };
+    }
+
+    const isExistEmail = await Account.findOne({
+      where: { email, account_id: { [Op.ne]: accountId } },
+      transaction,
+    });
+
+    if (isExistEmail) {
+      await transaction.rollback();
+      return {
+        success: false,
+        code: 409,
+        data: { msg: "Email already exists" },
+      };
+    }
+
     // Update new email
     account.email = email;
     account.is_verified = 0;
@@ -873,7 +904,7 @@ const verifyChangeEmailServices = async (accountId, email) => {
 
     // Store the token into email_confirmation table
     account.email_confirmation.token_verify_email = null;
-    account.email_confirmation.email = email
+    account.email_confirmation.email = email;
     account.email_confirmation.updated_at = sequelize.literal("NOW()");
     await account.email_confirmation.save({ transaction });
 
