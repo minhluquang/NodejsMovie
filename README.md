@@ -34,3 +34,24 @@ src/
 ├── server.js     # Entry point of the application
 ```
 
+## 📦 Installation
+```bash
+# Clone the repository
+git clone https://github.com/minhluquang/NodejsMovie
+
+# Navigate to the project folder
+cd NodejsMovie
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run start
+```
+
+## 📋 Prerequisites
+
+- Node.js >= 18.18.0
+- npm >= 9.8.1
+- Modern browser (Chrome, Firefox, Edge, Safari)
+- Recommended: Visual Studio Code
