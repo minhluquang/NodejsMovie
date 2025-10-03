@@ -12,11 +12,25 @@ Backend source code for a movie web application that allows users to view trendi
 - Movie/TV Series Details: see cast, images, and videos.
 - Actor Details: view detailed actor profiles.
 
-🧰 Technologies Used
+## 🧰 Technologies Used
 
 - **Backend:** Node.js with Express.
 - **Security:** JWT Authentication.
 - **Database:** MySQL.
-- **Email Service:** SendGrid (for verification and forgot password).
+- **Email Service:** Nodemailer.
 - **API Style:** RESTful APIs.
 - **Others:** npm, Git.
+
+## 🏗️ Project Structure
+```
+src/
+├── config/       # Configuration files 
+├── controllers/  # REST API controllers
+├── middlewares/  # Middleware functions 
+├── models/       # Database models 
+├── routers/      # Express route definitions
+├── services/     # Business logic
+├── templates/    # Email templates or view templates
+├── server.js     # Entry point of the application
+```
+
